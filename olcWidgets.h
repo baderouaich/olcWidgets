@@ -248,7 +248,7 @@ namespace olc { namespace widgets
 		pos(position),
 		size(size)
 	{
-		assert(pge && "olcGUI Must be Initialized, have you called olc::gui::Widget::Init(this); in OnUserCreate() ?");
+		assert(pge && "olcGUI Must be Initialized, have you called olc::widgets::Widget::Init(this); in OnUserCreate() ?");
 		
 		//each widget has a unique incremental id 
 		id = cid++;
