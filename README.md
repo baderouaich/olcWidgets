@@ -4,6 +4,7 @@ Some basic UI Widgets for the olc::PixelGameEngine
 
 # Supported Widgets 
 - Button
+- SpriteButton
 - DropDownList
 
 

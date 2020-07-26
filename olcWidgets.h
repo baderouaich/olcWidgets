@@ -68,13 +68,21 @@ namespace olc { namespace widgets
 	{
 		vf2d textScale = { 1.0f, 1.0f };
 
-		Pixel idleColor   = olc::VERY_DARK_GREY;
-		Pixel hoverColor  = olc::DARK_GREY;
-		Pixel activeColor = olc::DARK_CYAN;
+		Pixel idleColor   = olc::Pixel(56, 73, 105);
+		Pixel hoverColor  = olc::Pixel(73, 107, 171);
+		Pixel activeColor = olc::Pixel(78, 99, 173);
 
-		Pixel textIdleColor   = olc::GREY;
-		Pixel textHoverColor  = olc::WHITE;
-		Pixel textActiveColor = olc::WHITE;
+		Pixel textIdleColor   = olc::Pixel(200, 200, 200);
+		Pixel textHoverColor  = olc::Pixel(255, 255, 255);
+		Pixel textActiveColor = olc::Pixel(255, 255, 255);
+		
+		//Pixel idleColor   = olc::VERY_DARK_GREY;
+		//Pixel hoverColor  = olc::DARK_GREY;
+		//Pixel activeColor = olc::DARK_CYAN;
+		//
+		//Pixel textIdleColor   = olc::GREY;
+		//Pixel textHoverColor  = olc::WHITE;
+		//Pixel textActiveColor = olc::WHITE;
 
 		Pixel shadowColor = Pixel(60, 60, 60, 200);
 	};
@@ -198,6 +206,36 @@ namespace olc { namespace widgets
 
 
 
+
+
+
+	////////////////////////////////////////////////////////////////////
+	/////////======= SpriteButton Class Definition BEGIN =======/////////
+	////////////////////////////////////////////////////////////////////
+	class SpriteButton : public Button
+	{		
+	public:
+		SpriteButton(const vi2d& position, const vi2d& size, const std::string& text, const std::string& sprPath, const WidgetTheme& theme = WidgetTheme());
+		virtual ~SpriteButton();
+
+		virtual void Update(const float& dt) override;
+		virtual void Draw() override;
+
+	protected:
+		Renderable m_renderable;
+
+	};
+	////////////////////////////////////////////////////////////////////
+	/////////======= SpriteButton Base Class Definition END =======/////////
+	////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
 	////////////////////////////////////////////////////////////////////
 	/////////======= DropDownList Class Definition BEGIN =======/////////
 	////////////////////////////////////////////////////////////////////
@@ -228,13 +266,15 @@ namespace olc { namespace widgets
 
 
 
+
 	////////////////////////////////////////////////////////////////////
 	/////////======= CheckBox Class Definition BEGIN =======/////////
 	////////////////////////////////////////////////////////////////////
+#if 0
 	class CheckBox : public Widget
 	{
 	public:
-		CheckBox(const vi2d& position, const vi2d& size, const std::string& labelText, bool* checked, const WidgetTheme& theme = WidgetTheme());
+		CheckBox(const vi2d& position, const vi2d& size, const std::string& labelText, bool* checked = (bool*)false, const WidgetTheme& theme = WidgetTheme());
 		virtual ~CheckBox();
 
 		virtual void Update(const float& dt) override;
@@ -248,6 +288,7 @@ namespace olc { namespace widgets
 		Button* m_button;
 		bool*   m_checked;
 	};
+#endif
 	////////////////////////////////////////////////////////////////////
 	/////////======= CheckBox Base Class Definition END =======/////////
 	////////////////////////////////////////////////////////////////////
@@ -385,7 +426,7 @@ namespace olc { namespace widgets
 			},
 			m_text,
 			m_text_color,
-			this->theme.textScale
+			this->isHover() ? vf2d(0.95f, 0.95f) : this->theme.textScale
 		);
 
 		//Draw Shadow bellow button container
@@ -409,6 +450,68 @@ namespace olc { namespace widgets
 	}
 	////////////////////////////////////////////////////////////////////
 	/////////======= Button Class Implementation END =======////////////
+	////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+	////////////////////////////////////////////////////////////////////
+	/////////======= SpriteButton Class Implementation BEGIN =======/////////
+	////////////////////////////////////////////////////////////////////
+	
+	SpriteButton::SpriteButton(
+		const vi2d& position, const vi2d& size,
+		const std::string& text, 
+		const std::string& sprPath,
+		const WidgetTheme& theme)
+		:
+		Button(position, size, text, theme)
+	{
+		//Load sprite
+		m_renderable.Load(sprPath);
+		//Hide background button
+		this->setIdleColor(olc::Pixel(0, 0, 0, 0));
+		this->setHoverColor(olc::Pixel(0, 0, 0, 0));
+		this->setActiveColor(olc::Pixel(0, 0, 0, 0));
+		this->setShadowColor(olc::Pixel(0, 0, 0, 0));
+	}
+	
+	void SpriteButton::Update(const float& dt)
+	{
+		//Update Button base class first
+		Button::Update(dt);
+
+
+
+	}
+
+	void SpriteButton::Draw()
+	{	
+		//Dont draw the transparent button!
+		pge->SetPixelMode(Pixel::ALPHA);
+	
+		//Draw Sprite Decal
+		pge->DrawDecal(
+			this->pos,
+			m_renderable.Decal(),
+			// scale decale alongside with text on hover
+			this->isHover() ? vf2d(0.95f, 0.95f) : this->theme.textScale 
+		);
+
+		//Draw Button base class first
+		Button::Draw();
+
+		//Reset draw mode
+		pge->SetPixelMode(Pixel::NORMAL);
+	}
+
+	SpriteButton::~SpriteButton()
+	{
+	}
+	////////////////////////////////////////////////////////////////////
+	/////////======= SpriteButton Base Class Implementation END =======/////////
 	////////////////////////////////////////////////////////////////////
 
 
@@ -496,6 +599,24 @@ namespace olc { namespace widgets
 		Widget::Draw();
 
 		m_active_element->Draw(); //Draw default active element
+								  
+		//TODO: Draw down arrow as hint thats a drop down lisst
+		{
+			//vi2d p1 = { this->pos.x + this->size.x - 15, this->pos.y + (this->pos.y / 2) }; //LEFT
+			//vi2d p2 = { this->pos.x + this->size.x - 12, this->pos.y + int(this->pos.y / 2) } ; // CENTER BOTTOM
+			//vi2d p3 = { this->pos.x + this->size.x - 10, this->pos.y + (this->pos.y / 4) };//RIGHT
+
+			////pge->DrawString(p1, "1", olc::RED); // MEFT
+			////pge->DrawString(p2, "2", olc::GREEN);
+			////pge->DrawString(p3, "3", olc::BLUE);
+			//pge->FillTriangle(
+			//	p1, 
+			//	p2, 
+			//	p3, 
+			//	this->theme.textActiveColor
+			//);
+		}
+
 		if (m_show_list) //Only Draw list if should show
 		{
 			for (auto& element : m_elements_list)
@@ -534,6 +655,7 @@ namespace olc { namespace widgets
 	////////////////////////////////////////////////////////////////////
 	/////////======= CheckBox Class Implementation BEGIN =======/////////
 	////////////////////////////////////////////////////////////////////
+#if 0
 	CheckBox::CheckBox(const vi2d& position, const vi2d& size,
 		const std::string& labelText,
 		bool* checked,
@@ -582,7 +704,7 @@ namespace olc { namespace widgets
 		m_button->Draw();
 
 		//Draw Empty rect to the right to draw cross inside it when its checked
-		pge->FillRect(
+		pge->DrawRect(
 			this->pos.x + this->size.x , //minus extra width 25%
 			this->pos.y + 1, // +1 after shadow line
 			int(size.x * 0.25),
@@ -604,9 +726,6 @@ namespace olc { namespace widgets
 	}
 
 
-
-
-
 	CheckBox::~CheckBox()
 	{
 		delete m_button;
@@ -614,6 +733,18 @@ namespace olc { namespace widgets
 	////////////////////////////////////////////////////////////////////
 	/////////======= CheckBox Base Class Implementation END =======/////////
 	////////////////////////////////////////////////////////////////////
+#endif
+
+
+
+
+
+
+
+
+
+
+
 }}
 
 #endif
