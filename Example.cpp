@@ -17,16 +17,16 @@ public:
 private:
 	olc::widgets::Button* button;
 	olc::widgets::DropDownList* dropDownList;
+	olc::widgets::CheckBox* checkBox;
+	bool isChecked = false;
+
 public:
 	bool OnUserCreate() override
 	{
  		button = new olc::widgets::Button(
 			{ 10, 10 },
 			{ 160, 45 },
-			"Hi I am a Button!!!",
-			{ 1.0f, 1.0f},
-			olc::VERY_DARK_GREY, olc::DARK_GREY, olc::VERY_DARK_CYAN,
-			olc::GREY, olc::WHITE, olc::WHITE
+			"Hi I am a Button!!!"
 		);
 
 
@@ -37,6 +37,15 @@ public:
 			{"Hello", "Select Me", "I am default", "No! select mee", "here we go again"},
 			2 //default index
 		);
+
+
+		checkBox = new olc::widgets::CheckBox(
+			{  10, 100 },
+			{ 160, 45 },
+			"Check Me up!",
+			&isChecked
+		);
+
 		return true;
 	}
 
@@ -44,13 +53,12 @@ public:
 	{
 		//Update
 		button->Update(fElapsedTime);
-		dropDownList->Update(fElapsedTime);
-
 		if (button->isPressed())
 		{
 			//Do Something
 		}
-
+		dropDownList->Update(fElapsedTime);
+		checkBox->Update(fElapsedTime);
 
 
 		//Draw
@@ -58,6 +66,7 @@ public:
 		//FillRect(button->getPosition(), { 300, 300 }, olc::YELLOW); // to see shadow opacity
 		button->Draw();
 		dropDownList->Draw();
+		checkBox->Draw();
 
 		return true;
 	}
@@ -65,6 +74,8 @@ public:
 	bool OnUserDestroy() override
 	{
 		delete button;
+		delete dropDownList;
+		delete checkBox;
 
 		return true;
 	}

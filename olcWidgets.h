@@ -63,6 +63,21 @@ namespace olc { namespace widgets
 	////////////////////////////////////////////////////////////////////
 	/////////======= Widget Base Class Definition BEGIN =======/////////
 	////////////////////////////////////////////////////////////////////
+	enum WidgetState { IDLE = 0, HOVER, PRESSED, FOCUSED };
+	struct WidgetTheme
+	{
+		vf2d textScale = { 1.0f, 1.0f };
+
+		Pixel idleColor   = olc::VERY_DARK_GREY;
+		Pixel hoverColor  = olc::DARK_GREY;
+		Pixel activeColor = olc::DARK_CYAN;
+
+		Pixel textIdleColor   = olc::GREY;
+		Pixel textHoverColor  = olc::WHITE;
+		Pixel textActiveColor = olc::WHITE;
+
+		Pixel shadowColor = Pixel(60, 60, 60, 200);
+	};
 	class Widget
 	{
 	public:
@@ -90,7 +105,7 @@ namespace olc { namespace widgets
 
 
 	public:
-		Widget(const vi2d& position, const vi2d& size);
+		Widget(const vi2d& position, const vi2d& size, const WidgetTheme& theme = WidgetTheme(), WidgetState state = WidgetState::IDLE);
 		virtual ~Widget() = default;
 		
 		virtual void Update(const float& dt);
@@ -99,8 +114,8 @@ namespace olc { namespace widgets
 	public:
 		//Accessors
 		const unsigned short getId() const { return id; }
-		const vi2d& getPosition()  const noexcept { return this->pos; }
-		const vi2d& getSize()  const	noexcept { return this->size; }
+		const vi2d& getPosition() const noexcept { return this->pos; }
+		const vi2d& getSize() const noexcept { return this->size; }
 
 		//Modificators
 		void setId(unsigned short id) noexcept { this->id = id; }
@@ -111,16 +126,21 @@ namespace olc { namespace widgets
 		unsigned short id;
 		vi2d pos;
 		vi2d size;
+		WidgetTheme theme;
+		WidgetState state;
 
 	private:
 		static unsigned short cid; // id incremental counter 
 
 	protected:
 		constexpr bool contains(const olc::vi2d& point) const noexcept { return (point.x >= pos.x && point.y >= pos.y && point.x < pos.x + size.x && point.y < pos.y + size.y); }
-	
+		void setState(WidgetState state) noexcept { state = state; }
+		WidgetState getState() const noexcept { return state; }
+
 	protected:
 		static PixelGameEngine* pge;
 	};
+
 	//Initialize Static Memmbers
 	olc::PixelGameEngine* olc::widgets::Widget::pge = nullptr;
 	unsigned short olc::widgets::Widget::cid = 0;
@@ -129,60 +149,47 @@ namespace olc { namespace widgets
 	////////////////////////////////////////////////////////////////////
 
 
+
+
+
+
+
 	////////////////////////////////////////////////////////////////////
 	/////////======= Button Class Definition BEGIN =======/////////
 	////////////////////////////////////////////////////////////////////
-	enum  ButtonState { IDLE = 0, HOVER, PRESSED };
 	class Button : public Widget
-	{
+	{		
 	public:
-		Button(const vi2d& position, const vi2d& size,
-			const std::string& text, vf2d textScale,
-			Pixel idleColor, Pixel hoverColor, Pixel activeColor,
-			Pixel textIdleColor, Pixel textHoverColor, Pixel textActiveColor,
-			Pixel shadowColor = Pixel(60, 60, 60, 200));
+		Button(const vi2d& position, const vi2d& size, const std::string& text, const WidgetTheme& theme = WidgetTheme());
 		virtual ~Button();
 
 		virtual void Update(const float& dt) override;
 		virtual void Draw() override;
 
 		//Accessors
-		constexpr bool isPressed() const noexcept { return m_button_state == ButtonState::PRESSED; }
-		constexpr bool isHover()   const noexcept { return m_button_state == ButtonState::HOVER;   }
-		constexpr bool isIdle()    const noexcept { return m_button_state == ButtonState::IDLE;    }
-		
+		constexpr bool isPressed() const noexcept { return state == WidgetState::PRESSED; }
+		constexpr bool isHover()   const noexcept { return state == WidgetState::HOVER;   }
+		constexpr bool isIdle()    const noexcept { return state == WidgetState::IDLE;    }
+		constexpr bool isFocused() const noexcept { return state == WidgetState::FOCUSED || state == WidgetState::PRESSED; }
+
 		const std::string& getText() const noexcept { return m_text; }
-		const vf2d& getTextScale()   const noexcept { return m_text_scale; }
+		const vf2d& getTextScale()   const noexcept { return this->theme.textScale; }
 
 		//Modificators
 		void setText(const std::string& text) noexcept { m_text = text; }
-		void setTextScale(const vf2d& text_scale) noexcept { m_text_scale = text_scale; }
-		void setTextIdleColor(const Pixel color) noexcept   { m_text_idle_color = color;   }
-		void setTextHoverColor(const Pixel color) noexcept  { m_text_hover_color = color;  }
-		void setTextActiveColor(const Pixel color) noexcept { m_text_active_color = color; }
-		void setIdleColor(const Pixel color)   noexcept { m_idle_color = color;   }
-		void setHoverColor(const Pixel color)  noexcept { m_hover_color = color;  }
-		void setActiveColor(const Pixel color) noexcept { m_active_color = color; }
-		void setShadowColor(const Pixel color) noexcept { m_shadow_color = color; }
+		void setTextScale(const vf2d& text_scale) noexcept { this->theme.textScale = text_scale; }
+		void setTextIdleColor(const Pixel color) noexcept   { this->theme.textIdleColor = color;   }
+		void setTextHoverColor(const Pixel color) noexcept  { this->theme.textHoverColor = color;  }
+		void setTextActiveColor(const Pixel color) noexcept { this->theme.textActiveColor = color; }
+		void setIdleColor(const Pixel color)   noexcept { this->theme.idleColor = color;   }
+		void setHoverColor(const Pixel color)  noexcept { this->theme.hoverColor = color;  }
+		void setActiveColor(const Pixel color) noexcept { this->theme.activeColor = color; }
+		void setShadowColor(const Pixel color) noexcept { this->theme.shadowColor = color; }
 
-
-	private:
-		ButtonState m_button_state;
 
 	protected:
 		Pixel m_color, m_text_color; //Current state color
-
-		Pixel m_idle_color;
-		Pixel m_hover_color;
-		Pixel m_active_color;
-
 		std::string m_text;
-		vf2d m_text_scale;
-		Pixel m_text_idle_color;
-		Pixel m_text_hover_color;
-		Pixel m_text_active_color;
-
-		Pixel m_shadow_color; // Button Bottom & Left shadow color
 
 	};
 	////////////////////////////////////////////////////////////////////
@@ -197,7 +204,7 @@ namespace olc { namespace widgets
 	class DropDownList : public Widget
 	{
 	public:
-		DropDownList(const vi2d& position, const vi2d& size, const std::vector<std::string>& elementsList, size_t defaultIndex = 0);
+		DropDownList(const vi2d& position, const vi2d& size, const std::vector<std::string>& elementsList, size_t defaultIndex, const WidgetTheme& theme = WidgetTheme());
 		virtual ~DropDownList();
 
 		virtual void Update(const float& dt) override;
@@ -214,6 +221,35 @@ namespace olc { namespace widgets
 	};
 	////////////////////////////////////////////////////////////////////
 	/////////======= DropDownList Base Class Definition END =======/////////
+	////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+	////////////////////////////////////////////////////////////////////
+	/////////======= CheckBox Class Definition BEGIN =======/////////
+	////////////////////////////////////////////////////////////////////
+	class CheckBox : public Widget
+	{
+	public:
+		CheckBox(const vi2d& position, const vi2d& size, const std::string& labelText, bool* checked, const WidgetTheme& theme = WidgetTheme());
+		virtual ~CheckBox();
+
+		virtual void Update(const float& dt) override;
+		virtual void Draw() override;
+
+	public:
+		bool isChecked() const noexcept { return *m_checked; }
+		void setChecked(bool v) noexcept { *m_checked = v; }
+
+	private:
+		Button* m_button;
+		bool*   m_checked;
+	};
+	////////////////////////////////////////////////////////////////////
+	/////////======= CheckBox Base Class Definition END =======/////////
 	////////////////////////////////////////////////////////////////////
 
 
@@ -243,10 +279,12 @@ namespace olc { namespace widgets
 		pge = pixel_game_engine;
 	}
 
-	Widget::Widget(const vi2d& position, const vi2d& size)
+	Widget::Widget(const vi2d& position, const vi2d& size, const WidgetTheme& theme, WidgetState state)
 		:
 		pos(position),
-		size(size)
+		size(size),
+		state(state),
+		theme(theme)
 	{
 		assert(pge && "olcGUI Must be Initialized, have you called olc::widgets::Widget::Init(this); in OnUserCreate() ?");
 		
@@ -258,6 +296,23 @@ namespace olc { namespace widgets
 	{
 		//Update Clock
 		clock.Update(dt);
+
+		//Nothing is happening so far
+		state = WidgetState::IDLE;
+
+		//Hover
+		if (this->contains({ this->pge->GetMouseX() ,this->pge->GetMouseY() }))
+		{
+			state = WidgetState::HOVER;
+
+			//Check Pressed, If the left mouse pressed while hovering, its a Press event
+			if (pge->GetMouse(0).bHeld)
+			{
+				state = WidgetState::PRESSED;
+			}
+		}
+
+
 	}
 
 	void Widget::Draw()
@@ -275,22 +330,10 @@ namespace olc { namespace widgets
 	/////////======= Button Class Implementation BEGIN =======//////////
 	////////////////////////////////////////////////////////////////////
 	Button::Button(const vi2d& position, const vi2d& size, 
-		const std::string& text, vf2d textScale,
-		Pixel idleColor, Pixel hoverColor, Pixel activeColor,
-		Pixel textIdleColor, Pixel textHoverColor, Pixel textActiveColor,
-		Pixel shadowColor)
+		const std::string& text, const WidgetTheme& theme)
 		:
-		Widget(position, size),
-		m_idle_color(idleColor),
-		m_hover_color(hoverColor),
-		m_active_color(activeColor),
-		m_text(text),
-		m_text_scale(textScale),
-		m_text_idle_color(textIdleColor),
-		m_text_hover_color(textHoverColor),
-		m_text_active_color(textActiveColor),
-		m_button_state(ButtonState::IDLE),
-		m_shadow_color(shadowColor)
+		Widget(position, size, theme, WidgetState::IDLE),
+		m_text(text)
 	{
 
 	}
@@ -300,42 +343,26 @@ namespace olc { namespace widgets
 		//Update Base class first
 		Widget::Update(dt);
 
-		//Nothing is happening so far
-		m_button_state = ButtonState::IDLE;
-		
-		//Hover
-		if (this->contains({ this->pge->GetMouseX() ,this->pge->GetMouseY() }))
-		{
-			m_button_state = ButtonState::HOVER;
-			
-			//Check Pressed, If the left mouse pressed while hovering, its a Press event
-			if (pge->GetMouse(0).bHeld)
-			{
-				m_button_state = ButtonState::PRESSED;
-			}
-		}
-
 		//Update Button & Text Colors depending on button state.
-		switch (m_button_state)
+		switch (state)
 		{
-		case ButtonState::IDLE:
-			m_color = m_idle_color;
-			m_text_color = m_text_idle_color;
+		case WidgetState::IDLE:
+			m_color = this->theme.idleColor;
+			m_text_color = this->theme.textIdleColor;
 			break;
-		case ButtonState::HOVER:
-			m_color = m_hover_color;
-			m_text_color = m_text_hover_color;
+		case WidgetState::HOVER:
+			m_color = this->theme.hoverColor;
+			m_text_color = this->theme.textHoverColor;
 			break;
-		case ButtonState::PRESSED:
-			m_color = m_active_color;
-			m_text_color = m_text_active_color;
+		case WidgetState::PRESSED:
+			m_color = this->theme.activeColor;
+			m_text_color = this->theme.textActiveColor;
 			break;
 		default: //Error state
 			m_color = RED;
 			m_text_color = WHITE;
 			break;
 		}
-	
 	}
 
 	void Button::Draw()
@@ -346,8 +373,8 @@ namespace olc { namespace widgets
 		/// Render button
 		//background
 		pge->FillRect(this->pos, this->size, m_color);
+
 		//text
-		vi2d bounds(pge->GetTextSize(m_text));
 		pge->DrawStringDecal
 		(
 			//put text in middle
@@ -358,17 +385,18 @@ namespace olc { namespace widgets
 			},
 			m_text,
 			m_text_color,
-			m_text_scale
+			this->theme.textScale
 		);
+
 		//Draw Shadow bellow button container
-		if (m_button_state != ButtonState::PRESSED)
+		if (state != WidgetState::PRESSED)
 		{
 			//Enable opacity
 			pge->SetPixelMode(Pixel::ALPHA);
 			//Bottom
-			pge->DrawLine(pos.x, pos.y + size.y, pos.x + size.x, pos.y + size.y, m_shadow_color);
+			pge->DrawLine(pos.x, pos.y + size.y, pos.x + size.x, pos.y + size.y, this->theme.shadowColor);
 			//Right (to pos.y + size.y - 1: to not meet with bottom light, this will douplicate alpha color shadow at one point)
-			pge->DrawLine(pos.x + size.x, pos.y, pos.x + size.x, pos.y + size.y - 1, m_shadow_color);
+			pge->DrawLine(pos.x + size.x, pos.y, pos.x + size.x, pos.y + size.y - 1, this->theme.shadowColor);
 			//Disable opacity
 			pge->SetPixelMode(Pixel::NORMAL);
 		}
@@ -390,13 +418,16 @@ namespace olc { namespace widgets
 
 
 
-
 	////////////////////////////////////////////////////////////////////
 	/////////======= DropDownList Class Implementation BEGIN =======/////////
 	////////////////////////////////////////////////////////////////////
-	DropDownList::DropDownList(const vi2d& position, const vi2d& size, const std::vector<std::string>& elementsList, size_t defaultIndex)
+	DropDownList::DropDownList(const vi2d& position, 
+		const vi2d& size, 
+		const std::vector<std::string>& elementsList, 
+		size_t defaultIndex,
+		const WidgetTheme& theme)
 		:
-		Widget(position, size),
+		Widget(position, size, theme),
 		m_active_element(nullptr),
 		m_show_list(false) // list Hidden by default
 	{
@@ -405,9 +436,8 @@ namespace olc { namespace widgets
 		(
 			position,
 			size,
-			elementsList[defaultIndex], {1.0f, 1.0f},
-			Pixel(70, 70, 70, 200), Pixel(150, 150, 150, 200), Pixel(20, 20, 20, 200),
-			Pixel(255, 255, 255, 150), Pixel(255, 255, 255, 200), Pixel(20, 20, 20, 50)
+			elementsList[defaultIndex], 
+			theme
 		);
 
 		//Add elements to list
@@ -417,16 +447,15 @@ namespace olc { namespace widgets
 			(
 				{ position.x, position.y + (((int)i + 1) * size.y) }, // y + (i+1) * height: push down one bellow one
 				 size,
-				elementsList[i], { 1.0f, 1.0f },
-				Pixel(70, 70, 70, 200), Pixel(150, 150, 150, 200), Pixel(20, 20, 20, 200),
-				Pixel(255, 255, 255, 150), Pixel(255, 255, 255, 255), Pixel(20, 20, 20, 50)
+				elementsList[i],
+				theme
 			));
 		}
 	}
 	
 
 	void DropDownList::Update(const float& dt)
-	{
+	{ 
 		//Update Base class first
 		Widget::Update(dt);
 
@@ -484,9 +513,107 @@ namespace olc { namespace widgets
 			delete element;
 	}
 	////////////////////////////////////////////////////////////////////
-	/////////======= DropDownList Base Class Implementation END =======/////////
+	///////===== DropDownList Base Class Implementation END =====///////
 	////////////////////////////////////////////////////////////////////
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	////////////////////////////////////////////////////////////////////
+	/////////======= CheckBox Class Implementation BEGIN =======/////////
+	////////////////////////////////////////////////////////////////////
+	CheckBox::CheckBox(const vi2d& position, const vi2d& size,
+		const std::string& labelText,
+		bool* checked,
+		const WidgetTheme& theme)
+		:
+		Widget(position, size, theme),
+		m_checked(checked),
+		m_button(nullptr)
+	{
+
+		m_button = new Button(
+			position,
+			{
+				// extra 25% for check cross 
+				size.x + int(size.x * 0.25),
+				size.y
+			}, 
+			labelText,
+			theme
+		);
+	}
+
+	void CheckBox::Update(const float& dt)
+	{
+		//Update Base class first
+		Widget::Update(dt);
+
+		/// Update button
+		m_button->Update(dt);
+
+		// Update Checked/Unchecked
+		if (m_button->isPressed() && this->clock.canClick())
+		{
+			*m_checked = !(*m_checked);
+		}
+	}
+
+
+	void CheckBox::Draw() 
+	{		
+		//Draw Base class first
+		Widget::Draw();
+
+
+		/// Render button
+		m_button->Draw();
+
+		//Draw Empty rect to the right to draw cross inside it when its checked
+		pge->FillRect(
+			this->pos.x + this->size.x , //minus extra width 25%
+			this->pos.y + 1, // +1 after shadow line
+			int(size.x * 0.25),
+			size.y - 1, // -1 before shadow line
+			olc::GREY
+		);
+
+		// Draw Cross if its checked
+		if (*m_checked)
+		{
+			pge->FillRect(
+				(this->pos.x + this->size.x) - 10,
+				(this->pos.y) + 10,
+				20, 20,
+				olc::RED
+			);
+		}
+		
+	}
+
+
+
+
+
+	CheckBox::~CheckBox()
+	{
+		delete m_button;
+	}
+	////////////////////////////////////////////////////////////////////
+	/////////======= CheckBox Base Class Implementation END =======/////////
+	////////////////////////////////////////////////////////////////////
 }}
 
 #endif
