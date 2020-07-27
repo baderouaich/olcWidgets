@@ -56,6 +56,7 @@
 
 #include <cassert>
 #include <vector>
+#include <iomanip>
 
 namespace olc { namespace widgets
 {
@@ -66,24 +67,23 @@ namespace olc { namespace widgets
 	enum WidgetState { IDLE = 0, HOVER, PRESSED, FOCUSED };
 	struct WidgetTheme
 	{
+		//Widget text scale x,y
 		vf2d textScale = { 1.0f, 1.0f };
 
+		//widget on idle color
 		Pixel idleColor   = olc::Pixel(56, 73, 105);
+		//widget on hover color
 		Pixel hoverColor  = olc::Pixel(73, 107, 171);
+		//widget on active color
 		Pixel activeColor = olc::Pixel(78, 99, 173);
 
+		//widget text on active color
 		Pixel textIdleColor   = olc::Pixel(200, 200, 200);
+		//widget text on hover color
 		Pixel textHoverColor  = olc::Pixel(255, 255, 255);
+		//widget text on active color
 		Pixel textActiveColor = olc::Pixel(255, 255, 255);
-		
-		//Pixel idleColor   = olc::VERY_DARK_GREY;
-		//Pixel hoverColor  = olc::DARK_GREY;
-		//Pixel activeColor = olc::DARK_CYAN;
-		//
-		//Pixel textIdleColor   = olc::GREY;
-		//Pixel textHoverColor  = olc::WHITE;
-		//Pixel textActiveColor = olc::WHITE;
-
+		//widget bottom and right line to simulate shadow color (for buttons mostly)
 		Pixel shadowColor = Pixel(60, 60, 60, 200);
 	};
 	class Widget
@@ -121,7 +121,7 @@ namespace olc { namespace widgets
 
 	public:
 		//Accessors
-		const unsigned short getId() const { return id; }
+		const unsigned short getId() const noexcept { return id; }
 		const vi2d& getPosition() const noexcept { return this->pos; }
 		const vi2d& getSize() const noexcept { return this->size; }
 
@@ -138,7 +138,7 @@ namespace olc { namespace widgets
 		WidgetState state;
 
 	private:
-		static unsigned short cid; // id incremental counter 
+		static unsigned short idc; // id incremental counter 
 
 	protected:
 		constexpr bool contains(const olc::vi2d& point) const noexcept { return (point.x >= pos.x && point.y >= pos.y && point.x < pos.x + size.x && point.y < pos.y + size.y); }
@@ -151,7 +151,7 @@ namespace olc { namespace widgets
 
 	//Initialize Static Memmbers
 	olc::PixelGameEngine* olc::widgets::Widget::pge = nullptr;
-	unsigned short olc::widgets::Widget::cid = 0;
+	unsigned short olc::widgets::Widget::idc = 0;
 	////////////////////////////////////////////////////////////////////
 	/////////======= Widget Base Class Definition END =======/////////
 	////////////////////////////////////////////////////////////////////
@@ -221,7 +221,7 @@ namespace olc { namespace widgets
 		virtual void Update(const float& dt) override;
 		virtual void Draw() override;
 
-	protected:
+	private:
 		Renderable m_renderable;
 
 	};
@@ -251,6 +251,13 @@ namespace olc { namespace widgets
 	public:
 		//Accessors
 		const Button* getSelectedItem() const noexcept { return m_active_element; }
+		size_t getSelectedItemIndex() const
+		{
+			for (size_t i = 0; i < m_elements_list.size(); i++)
+				if (m_elements_list[i]->getId() == m_active_element->getId())
+					return i;
+			return 0;
+		}
 
 	private:
 		Button* m_active_element;
@@ -259,6 +266,47 @@ namespace olc { namespace widgets
 	};
 	////////////////////////////////////////////////////////////////////
 	/////////======= DropDownList Base Class Definition END =======/////////
+	////////////////////////////////////////////////////////////////////
+
+
+
+
+
+	////////////////////////////////////////////////////////////////////
+	/////////======= ProgressBar Class Definition BEGIN =======/////////
+	////////////////////////////////////////////////////////////////////
+	class ProgressBar : public Widget
+	{
+	public:
+		ProgressBar(const vi2d& position, const vi2d& size, float value = 0.0f, Pixel progressColor = GREEN, const WidgetTheme& theme = WidgetTheme());
+		virtual ~ProgressBar();
+
+		virtual void Update(const float& dt) override;
+		virtual void Draw() override;
+
+	public:
+		//Modificators
+		//[0.0f...100.0f]
+		void setValue(float value) noexcept 
+		{
+			//Clamp value
+			if (value < 0.0f)
+				m_value = 0.0f;
+			else if (value > 100.0f)
+				m_value = 100.0f;
+			else
+				m_value = value;
+		}
+
+		//Accessors
+		float getValue() const noexcept { return m_value; }
+
+	private:
+		float m_value;
+		Pixel m_progress_color;
+	};
+	////////////////////////////////////////////////////////////////////
+	/////////======= ProgressBar Base Class Definition END =======/////////
 	////////////////////////////////////////////////////////////////////
 
 
@@ -330,7 +378,7 @@ namespace olc { namespace widgets
 		assert(pge && "olcGUI Must be Initialized, have you called olc::widgets::Widget::Init(this); in OnUserCreate() ?");
 		
 		//each widget has a unique incremental id 
-		id = cid++;
+		id = ++idc;
 	}
 
 	void Widget::Update(const float& dt)
@@ -422,7 +470,6 @@ namespace olc { namespace widgets
 			{
 				this->pos.x + (this->size.x / 2.0f) - (pge->GetTextSize(m_text).x / 2.0f),
 				this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSize(m_text).y / 2.0f)
-
 			},
 			m_text,
 			m_text_color,
@@ -497,10 +544,10 @@ namespace olc { namespace widgets
 			this->pos,
 			m_renderable.Decal(),
 			// scale decale alongside with text on hover
-			this->isHover() ? vf2d(0.95f, 0.95f) : this->theme.textScale 
+			this->isHover() ? vf2d(0.99f, 0.99f) : this->theme.textScale
 		);
 
-		//Draw Button base class first
+		//Draw Transparent Button base above the Sprite
 		Button::Draw();
 
 		//Reset draw mode
@@ -587,8 +634,14 @@ namespace olc { namespace widgets
 					//Set id to active element to selected one
 					m_active_element->setId(element->getId());
 				}
+
+				
 			}
+			
+			//TODO: If user pressed outside dropdownlist, close it
+			
 		}
+
 
 	}
 
@@ -648,6 +701,92 @@ namespace olc { namespace widgets
 
 
 
+
+
+
+	////////////////////////////////////////////////////////////////////
+	///////===== ProgressBar Class Implementation BEGIN ======//////////
+	////////////////////////////////////////////////////////////////////
+	ProgressBar::ProgressBar(
+		const vi2d& position,
+		const vi2d& size,
+		float value,
+		Pixel progressColor,
+		const WidgetTheme& theme)
+		:
+		Widget(position, size, theme),
+		m_value(value),
+		m_progress_color(progressColor)
+	{
+		
+	}
+
+	void ProgressBar::Update(const float& dt)
+	{
+		//Update Base class first
+		Widget::Update(dt);
+
+
+	}
+
+	void ProgressBar::Draw()
+	{
+		//Draw Base class first
+		Widget::Draw();
+
+		//Draw Rect to be filled by progress
+		pge->DrawRect(
+			this->pos,
+			this->size,
+			this->theme.idleColor
+		);
+
+		//Draw transparent fill progress rect  (not the value, background of value)
+		pge->FillRect(
+			this->pos.x + 1,
+			this->pos.y + 1,
+			this->size.x - 1, 
+			this->size.y - 1,
+			Pixel(255, 255, 255, 200)
+		);
+
+
+		//Draw Line to fill progress rect according to progress value
+		pge->FillRect(
+			this->pos.x + 1,
+			this->pos.y + 1,
+			int(((this->size.x - 1) * m_value) / 100.0f), // calculate percentage value
+			this->size.y - 1,
+			m_progress_color
+		);
+
+		//Draw Percentage text e.g: 50/100
+		{
+			std::stringstream ss;
+			ss  << std::fixed 
+				<< std::setprecision(m_value >= 100.0f || m_value <= 0.0f ? 0 : 2)
+				<< m_value << "/100";
+
+			pge->DrawStringDecal(
+				{
+					this->pos.x + (this->size.x / 2.0f) - (pge->GetTextSize(ss.str()).x / 2.0f),
+					this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSize(ss.str()).y / 2.0f)
+					//this->pos.x + this->size.x + 3.0f,
+					//this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSize("100.0/100.0").y / 2.0f)
+				},
+				ss.str(), 
+				this->theme.textActiveColor,
+				this->theme.textScale
+			);
+		}
+	}
+
+	ProgressBar::~ProgressBar()
+	{
+	}
+	////////////////////////////////////////////////////////////////////
+	//////===== ProgressBar Base Class Implementation END =======///////
+	////////////////////////////////////////////////////////////////////
 
 
 
