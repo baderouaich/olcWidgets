@@ -507,7 +507,6 @@ namespace olc { namespace widgets
 	////////////////////////////////////////////////////////////////////
 	/////////======= SpriteButton Class Implementation BEGIN =======/////////
 	////////////////////////////////////////////////////////////////////
-	
 	SpriteButton::SpriteButton(
 		const vi2d& position, const vi2d& size,
 		const std::string& text, 
@@ -529,9 +528,6 @@ namespace olc { namespace widgets
 	{
 		//Update Button base class first
 		Button::Update(dt);
-
-
-
 	}
 
 	void SpriteButton::Draw()
@@ -652,24 +648,7 @@ namespace olc { namespace widgets
 		Widget::Draw();
 
 		m_active_element->Draw(); //Draw default active element
-								  
-		//TODO: Draw down arrow as hint thats a drop down lisst
-		{
-			//vi2d p1 = { this->pos.x + this->size.x - 15, this->pos.y + (this->pos.y / 2) }; //LEFT
-			//vi2d p2 = { this->pos.x + this->size.x - 12, this->pos.y + int(this->pos.y / 2) } ; // CENTER BOTTOM
-			//vi2d p3 = { this->pos.x + this->size.x - 10, this->pos.y + (this->pos.y / 4) };//RIGHT
-
-			////pge->DrawString(p1, "1", olc::RED); // MEFT
-			////pge->DrawString(p2, "2", olc::GREEN);
-			////pge->DrawString(p3, "3", olc::BLUE);
-			//pge->FillTriangle(
-			//	p1, 
-			//	p2, 
-			//	p3, 
-			//	this->theme.textActiveColor
-			//);
-		}
-
+								
 		if (m_show_list) //Only Draw list if should show
 		{
 			for (auto& element : m_elements_list)
