@@ -43,7 +43,7 @@ public:
 
 		//DropDownList
 		dropDownList = new olc::widgets::DropDownList(
-			{ 10, 60 },
+			{ spriteBtn->getPosition().x + button->getSize().x + 30, 10 },
 			{ 130, 30 },
 			{"First!!", "Select Me", "DropDownList", "No! select mee"},
 			2 //default index
@@ -52,7 +52,7 @@ public:
 
 		//ProgressBar
 		progressBar = new olc::widgets::ProgressBar(
-			{ dropDownList->getPosition().x + button->getSize().x + 30, 60 },
+			{ dropDownList->getPosition().x + button->getSize().x + 30, 10 },
 			{ 130, 20 },
 			50.0f // 50%
 		);
