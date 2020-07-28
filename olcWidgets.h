@@ -95,7 +95,7 @@ namespace olc { namespace widgets
 		struct Clock
 		{
 			float timer = 0.0f;
-			const float max_click_secs = 0.3f; // time to wait before performing a new click event, to avoid repeated click due high FPS.
+			const float max_click_secs = 0.3f; // time to wait before performing a new click event, to avoid clicking repeatedly due high FPS.
 
 			void Update(const float& dt) { timer += dt; }
 
@@ -153,7 +153,7 @@ namespace olc { namespace widgets
 	olc::PixelGameEngine* olc::widgets::Widget::pge = nullptr;
 	unsigned short olc::widgets::Widget::idc = 0;
 	////////////////////////////////////////////////////////////////////
-	/////////======= Widget Base Class Definition END =======/////////
+	/////////======= Widget Base Class Definition END =======///////////
 	////////////////////////////////////////////////////////////////////
 
 
@@ -163,7 +163,7 @@ namespace olc { namespace widgets
 
 
 	////////////////////////////////////////////////////////////////////
-	/////////======= Button Class Definition BEGIN =======/////////
+	/////////======= Button Class Definition BEGIN =======//////////////
 	////////////////////////////////////////////////////////////////////
 	class Button : public Widget
 	{		
@@ -201,7 +201,7 @@ namespace olc { namespace widgets
 
 	};
 	////////////////////////////////////////////////////////////////////
-	/////////======= Button Base Class Definition END =======/////////
+	//////////======= Button Class Definition END =======///////////////
 	////////////////////////////////////////////////////////////////////
 
 
@@ -210,7 +210,7 @@ namespace olc { namespace widgets
 
 
 	////////////////////////////////////////////////////////////////////
-	/////////======= SpriteButton Class Definition BEGIN =======/////////
+	/////////====== SpriteButton Class Definition BEGIN =======/////////
 	////////////////////////////////////////////////////////////////////
 	class SpriteButton : public Button
 	{		
@@ -226,7 +226,7 @@ namespace olc { namespace widgets
 
 	};
 	////////////////////////////////////////////////////////////////////
-	/////////======= SpriteButton Base Class Definition END =======/////////
+	/////////====== SpriteButton Class Definition END =======///////////
 	////////////////////////////////////////////////////////////////////
 
 
@@ -237,7 +237,7 @@ namespace olc { namespace widgets
 
 
 	////////////////////////////////////////////////////////////////////
-	/////////======= DropDownList Class Definition BEGIN =======/////////
+	/////////======= DropDownList Class Definition BEGIN =======////////
 	////////////////////////////////////////////////////////////////////
 	class DropDownList : public Widget
 	{
@@ -265,7 +265,7 @@ namespace olc { namespace widgets
 		bool m_show_list;
 	};
 	////////////////////////////////////////////////////////////////////
-	/////////======= DropDownList Base Class Definition END =======/////////
+	/////////======= DropDownList Class Definition END =======//////////
 	////////////////////////////////////////////////////////////////////
 
 
@@ -308,7 +308,7 @@ namespace olc { namespace widgets
 		Pixel m_progress_color;
 	};
 	////////////////////////////////////////////////////////////////////
-	/////////======= ProgressBar Base Class Definition END =======/////////
+	/////////======= ProgressBar Class Definition END =======///////////
 	////////////////////////////////////////////////////////////////////
 
 
@@ -317,31 +317,7 @@ namespace olc { namespace widgets
 
 
 
-	////////////////////////////////////////////////////////////////////
-	/////////======= CheckBox Class Definition BEGIN =======/////////
-	////////////////////////////////////////////////////////////////////
-#if 0
-	class CheckBox : public Widget
-	{
-	public:
-		CheckBox(const vi2d& position, const vi2d& size, const std::string& labelText, bool* checked = (bool*)false, const WidgetTheme& theme = WidgetTheme());
-		virtual ~CheckBox();
 
-		virtual void Update(const float& dt) override;
-		virtual void Draw() override;
-
-	public:
-		bool isChecked() const noexcept { return *m_checked; }
-		void setChecked(bool v) noexcept { *m_checked = v; }
-
-	private:
-		Button* m_button;
-		bool*   m_checked;
-	};
-#endif
-	////////////////////////////////////////////////////////////////////
-	/////////======= CheckBox Base Class Definition END =======/////////
-	////////////////////////////////////////////////////////////////////
 
 
 }
@@ -399,7 +375,7 @@ namespace olc { namespace widgets
 			//Check Pressed, If the left mouse pressed while hovering, its a Press event
 			if (pge->GetMouse(0).bHeld)
 			{
-				state = WidgetState::PRESSED;
+				state = WidgetState::PRESSED;			
 			}
 		}
 
@@ -507,7 +483,7 @@ namespace olc { namespace widgets
 
 
 	////////////////////////////////////////////////////////////////////
-	/////////======= SpriteButton Class Implementation BEGIN =======/////////
+	///////===== SpriteButton Class Implementation BEGIN =======////////
 	////////////////////////////////////////////////////////////////////
 	SpriteButton::SpriteButton(
 		const vi2d& position, const vi2d& size,
@@ -556,7 +532,7 @@ namespace olc { namespace widgets
 	{
 	}
 	////////////////////////////////////////////////////////////////////
-	/////////======= SpriteButton Base Class Implementation END =======/////////
+	///////======= SpriteButton Class Implementation END =======////////
 	////////////////////////////////////////////////////////////////////
 
 
@@ -567,7 +543,7 @@ namespace olc { namespace widgets
 
 
 	////////////////////////////////////////////////////////////////////
-	/////////======= DropDownList Class Implementation BEGIN =======/////////
+	///////===== DropDownList Class Implementation BEGIN =======////////
 	////////////////////////////////////////////////////////////////////
 	DropDownList::DropDownList(const vi2d& position, 
 		const vi2d& size, 
@@ -632,12 +608,10 @@ namespace olc { namespace widgets
 					//Set id to active element to selected one
 					m_active_element->setId(element->getId());
 				}
-
 				
 			}
 			
 			//TODO: If user pressed outside dropdownlist, close it
-			
 		}
 
 
@@ -668,7 +642,7 @@ namespace olc { namespace widgets
 			delete element;
 	}
 	////////////////////////////////////////////////////////////////////
-	///////===== DropDownList Base Class Implementation END =====///////
+	///////===== DropDownList Class Implementation END =====///////
 	////////////////////////////////////////////////////////////////////
 
 
@@ -761,7 +735,7 @@ namespace olc { namespace widgets
 			);
 		}
 		/*
-		//
+		//Show percentage value/max
 		{
 			std::stringstream ss;
 			ss  << std::fixed 
@@ -787,94 +761,16 @@ namespace olc { namespace widgets
 	{
 	}
 	////////////////////////////////////////////////////////////////////
-	//////===== ProgressBar Base Class Implementation END =======///////
+	//////===== ProgressBar Class Implementation END =======///////
 	////////////////////////////////////////////////////////////////////
 
 
 
 
-	////////////////////////////////////////////////////////////////////
-	/////////======= CheckBox Class Implementation BEGIN =======/////////
-	////////////////////////////////////////////////////////////////////
-#if 0
-	CheckBox::CheckBox(const vi2d& position, const vi2d& size,
-		const std::string& labelText,
-		bool* checked,
-		const WidgetTheme& theme)
-		:
-		Widget(position, size, theme),
-		m_checked(checked),
-		m_button(nullptr)
-	{
-
-		m_button = new Button(
-			position,
-			{
-				// extra 25% for check cross 
-				size.x + int(size.x * 0.25),
-				size.y
-			}, 
-			labelText,
-			theme
-		);
-	}
-
-	void CheckBox::Update(const float& dt)
-	{
-		//Update Base class first
-		Widget::Update(dt);
-
-		/// Update button
-		m_button->Update(dt);
-
-		// Update Checked/Unchecked
-		if (m_button->isPressed() && this->clock.canClick())
-		{
-			*m_checked = !(*m_checked);
-		}
-	}
 
 
-	void CheckBox::Draw() 
-	{		
-		//Draw Base class first
-		Widget::Draw();
 
 
-		/// Render button
-		m_button->Draw();
-
-		//Draw Empty rect to the right to draw cross inside it when its checked
-		pge->DrawRect(
-			this->pos.x + this->size.x , //minus extra width 25%
-			this->pos.y + 1, // +1 after shadow line
-			int(size.x * 0.25),
-			size.y - 1, // -1 before shadow line
-			olc::GREY
-		);
-
-		// Draw Cross if its checked
-		if (*m_checked)
-		{
-			pge->FillRect(
-				(this->pos.x + this->size.x) - 10,
-				(this->pos.y) + 10,
-				20, 20,
-				olc::RED
-			);
-		}
-		
-	}
-
-
-	CheckBox::~CheckBox()
-	{
-		delete m_button;
-	}
-	////////////////////////////////////////////////////////////////////
-	/////////======= CheckBox Base Class Implementation END =======/////////
-	////////////////////////////////////////////////////////////////////
-#endif
 
 
 

@@ -59,6 +59,7 @@ public:
 		progressBar->setValue(progressBar->getValue() + 10.0f); // 60%: 50% + 10%
 
 
+
 		return true;
 	}
 
