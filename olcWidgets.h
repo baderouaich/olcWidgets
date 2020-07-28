@@ -71,12 +71,19 @@ namespace olc { namespace widgets
 		vf2d textScale = { 1.0f, 1.0f };
 
 		//widget on idle color
+		Pixel idleColor   = olc::Pixel(88, 81, 107);
+		//widget on hover color
+		Pixel hoverColor = olc::Pixel(104, 96, 128);
+		//widget on active color
+		Pixel activeColor = olc::Pixel(110, 99, 145);
+#if 0
+		//widget on idle color
 		Pixel idleColor   = olc::Pixel(56, 73, 105);
 		//widget on hover color
 		Pixel hoverColor  = olc::Pixel(73, 107, 171);
 		//widget on active color
 		Pixel activeColor = olc::Pixel(78, 99, 173);
-
+#endif
 		//widget text on active color
 		Pixel textIdleColor   = olc::Pixel(200, 200, 200);
 		//widget text on hover color

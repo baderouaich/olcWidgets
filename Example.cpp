@@ -13,8 +13,8 @@ public:
 
 private:
 	olc::widgets::Button* button;
-	olc::widgets::SpriteButton* spriteBtn;
 	olc::widgets::DropDownList* dropDownList;
+	olc::widgets::SpriteButton* spriteBtn;
 	olc::widgets::ProgressBar* progressBar;
 
 public:
@@ -32,32 +32,32 @@ public:
 			"Button"
 		);
 
-		//Sprite Button
- 		spriteBtn = new olc::widgets::SpriteButton(
-			{ button->getPosition().x + button->getSize().x + 30, 10 },
-			{ 130, 40 },
-			"Sprite Btn",
-			"btnSpr130x40.png"
-		);
-		
 
 		//DropDownList
 		dropDownList = new olc::widgets::DropDownList(
-			{ spriteBtn->getPosition().x + button->getSize().x + 30, 10 },
+			{ button->getPosition().x + button->getSize().x + 30, 10 },
 			{ 130, 30 },
 			{"First!!", "Select Me", "DropDownList", "No! select mee"},
 			2 //default index
 		);
 		
 
+		//Sprite Button
+		spriteBtn = new olc::widgets::SpriteButton(
+			{ dropDownList->getPosition().x + dropDownList->getSize().x + 30, 10 },
+			{ 130, 40 },
+			"Sprite Btn",
+			"btnSpr130x40.png"
+		);
+
+
 		//ProgressBar
 		progressBar = new olc::widgets::ProgressBar(
-			{ dropDownList->getPosition().x + button->getSize().x + 30, 10 },
+			{ spriteBtn->getPosition().x + spriteBtn->getSize().x + 30, 10 },
 			{ 130, 20 },
 			50.0f // 50%
 		);
 		progressBar->setValue(progressBar->getValue() + 10.0f); // 60%: 50% + 10%
-
 
 
 		return true;
@@ -67,16 +67,18 @@ public:
 	{
 		Clear(olc::DARK_GREY);
 
+		/// Update & Draw your Widgets
+
 		//Update
 		button->Update(fElapsedTime); if (button->isPressed()) {/*Do Something*/ }
-		spriteBtn->Update(fElapsedTime);
 		dropDownList->Update(fElapsedTime);
+		spriteBtn->Update(fElapsedTime);
 		progressBar->Update(fElapsedTime);  progressBar->setValue(progressBar->getValue() + (GetMouseWheel() > 0 ? 100 * fElapsedTime : GetMouseWheel() < 0 ? -100 * fElapsedTime : 0));
 
 		//Draw
 		button->Draw();
-		spriteBtn->Draw();
 		dropDownList->Draw();
+		spriteBtn->Draw();
 		progressBar->Draw();
 
 		return true;
@@ -85,8 +87,8 @@ public:
 	bool OnUserDestroy() override
 	{
 		delete button;
-		delete spriteBtn;
 		delete dropDownList;
+		delete spriteBtn;
 		delete progressBar;
 
 		return true;
