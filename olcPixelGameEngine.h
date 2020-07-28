@@ -1,8 +1,8 @@
-ï»¿/*
+/*
 	olcPixelGameEngine.h
 
 	+-------------------------------------------------------------+
-	|           OneLoneCoder Pixel Game Engine v2.06              |
+	|           OneLoneCoder Pixel Game Engine v2.07              |
 	|  "What do you need? Pixels... Lots of Pixels..." - javidx9  |
 	+-------------------------------------------------------------+
 
@@ -109,9 +109,9 @@
 	~~~~~~
 	I'd like to extend thanks to Eremiell, slavka, gurkanctn, Phantim, IProgramInCPP
 	JackOJC, KrossX, Huhlig, Dragoneye, Appa, JustinRichardsMusic, SliceNDice, dandistine
-	Ralakus, Gorbit99, raoul, joshinils, benedani, Moros1138, SaladinAkara & MagetzUb
+	Ralakus, Gorbit99, raoul, joshinils, benedani, Moros1138, Alexio, SaladinAkara & MagetzUb
 	for advice, ideas and testing, and I'd like to extend my appreciation to the
-	164K YouTube followers,	70+ Patreons and 8K Discord server members who give me
+	174K YouTube followers,	70+ Patreons and 8K Discord server members who give me
 	the motivation to keep going with all this :D
 
 	Significant Contributors: @Moros1138, @SaladinAkara, @MaGetzUb, @slavka, @Dragoneye & @Gorbit99
@@ -129,23 +129,32 @@
 
 	Author
 	~~~~~~
-	David Barr, aka javidx9, ï¿½OneLoneCoder 2018, 2019, 2020
+	David Barr, aka javidx9, ©OneLoneCoder 2018, 2019, 2020
 
 	2.01: Made renderer and platform static for multifile projects
 	2.02: Added Decal destructor, optimised Pixel constructor
 	2.03: Added FreeBSD flags, Added DrawStringDecal()
 	2.04: Windows Full-Screen bug fixed
-	2.05: Added DrawPartialWarpedDecal(), Added DrawPartialRotatedDecal()
+	2.05: +DrawPartialWarpedDecal() - draws a warped decal from a subset image
+		  +DrawPartialRotatedDecal() - draws a rotated decal from a subset image
 	2.06: +GetTextSize() - returns area occupied by multiline string
 		  +GetWindowSize() - returns actual window size
 		  +GetElapsedTime() - returns last calculated fElapsedTime
 		  +GetWindowMouse() - returns actual mouse location in window
 		  +DrawExplicitDecal() - bow-chikka-bow-bow
-		  +DrawPartialDecal(pos, size) - draws a partial decal to dpecified area
+		  +DrawPartialDecal(pos, size) - draws a partial decal to specified area
 		  +FillRectDecal() - draws a flat shaded rectangle as a decal
 		  +GradientFillRectDecal() - draws a rectangle, with unique colour corners
 		  +Modified DrawCircle() & FillCircle() - Thanks IanM-Matrix1 (#PR121)
 		  +Gone someway to appeasing pedants
+	2.07: +GetPixelSize() - returns user specified pixel size
+		  +GetScreenPixelSize() - returns actual size in monitor pixels
+		  +Pixel Cohesion Mode (flag in Construct()) - disallows arbitrary window scaling
+		  +Working VSYNC in Windows windowed application - now much smoother
+		  +Added string conversion for olc::vectors
+		  +Added comparator operators for olc::vectors
+		  +Added DestroyWindow() on windows platforms for serial PGE launches
+		  +Added GetMousePos() to stop TarriestPython whinging
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -340,7 +349,7 @@ namespace olc
 		v2d_generic() : x(0), y(0) {                                                            }
 		v2d_generic(T _x, T _y) : x(_x), y(_y) {                                                            }
 		v2d_generic(const v2d_generic& v) : x(v.x), y(v.y) {                                                            }
-		T mag() { return std::sqrt(x * x + y * y); }
+		T mag() { return T(std::sqrt(x * x + y * y)); }
 		T mag2() { return x * x + y * y; }
 		v2d_generic  norm() { T r = 1 / mag(); return v2d_generic(x * r, y * r); }
 		v2d_generic  perp() { return v2d_generic(-y, x); }
@@ -356,6 +365,10 @@ namespace olc
 		v2d_generic& operator -= (const v2d_generic& rhs) { this->x -= rhs.x; this->y -= rhs.y; return *this; }
 		v2d_generic& operator *= (const T& rhs) { this->x *= rhs; this->y *= rhs; return *this; }
 		v2d_generic& operator /= (const T& rhs) { this->x /= rhs; this->y /= rhs; return *this; }
+		bool operator == (const v2d_generic& rhs) const { return (this->x == rhs.x && this->y == rhs.y); }
+		bool operator != (const v2d_generic& rhs) const { return (this->x != rhs.x || this->y != rhs.y); }
+		const std::string str() const { return std::string("(") + std::to_string(this->x) + "," + std::to_string(this->y) + ")"; }
+		friend std::ostream& operator << (std::ostream& os, const v2d_generic& rhs) { os << rhs.str(); return os; }
 		operator v2d_generic<int32_t>() const { return { static_cast<int32_t>(this->x), static_cast<int32_t>(this->y) }; }
 		operator v2d_generic<float>() const { return { static_cast<float>(this->x), static_cast<float>(this->y) }; }
 		operator v2d_generic<double>() const { return { static_cast<double>(this->x), static_cast<double>(this->y) }; }
@@ -588,7 +601,7 @@ namespace olc
 		virtual ~PixelGameEngine();
 	public:
 		olc::rcode Construct(int32_t screen_w, int32_t screen_h, int32_t pixel_w, int32_t pixel_h,
-			bool full_screen = false, bool vsync = false);
+			bool full_screen = false, bool vsync = false, bool cohesion = false);
 		olc::rcode Start();
 
 	public: // User Override Interfaces
@@ -607,13 +620,15 @@ namespace olc
 		// Get the state of a specific mouse button
 		HWButton GetMouse(uint32_t b);
 		// Get Mouse X coordinate in "pixel" space
-		int32_t GetMouseX();
+		int32_t GetMouseX() const;
 		// Get Mouse Y coordinate in "pixel" space
-		int32_t GetMouseY();
+		int32_t GetMouseY() const;
 		// Get Mouse Wheel Delta
 		int32_t GetMouseWheel();
-		// Get the ouse in window space
+		// Get the mouse in window space
 		const olc::vi2d& GetWindowMouse() const;
+		// Gets the mouse as a vector to keep Tarriest happy
+		const olc::vi2d& GetMousePos() const;
 
 	public: // Utility
 		// Returns the width of the screen in "pixels"
@@ -637,6 +652,10 @@ namespace olc
 		const float GetElapsedTime() const;
 		// Gets Actual Window size
 		const olc::vi2d& GetWindowSize() const;
+		// Gets pixel scale
+		const olc::vi2d& GetPixelSize() const;
+		// Gets actual pixel scale
+		const olc::vi2d& GetScreenPixelSize() const;
 
 	public: // CONFIGURATION ROUTINES
 		// Layer targeting functions
@@ -749,6 +768,7 @@ namespace olc
 		olc::vi2d	vScreenSize = { 256, 240 };
 		olc::vf2d	vInvScreenSize = { 1.0f / 256.0f, 1.0f / 240.0f };
 		olc::vi2d	vPixelSize = { 4, 4 };
+		olc::vi2d   vScreenPixelSize = { 4, 4 };
 		olc::vi2d	vMousePos = { 0, 0 };
 		int32_t		nMouseWheelDelta = 0;
 		olc::vi2d	vMousePosCache = { 0, 0 };
@@ -771,6 +791,7 @@ namespace olc
 		std::vector<LayerDesc> vLayers;
 		uint8_t		nTargetLayer = 0;
 		uint32_t	nLastFPS = 0;
+		bool        bPixelCohesion = false;
 		std::function<olc::Pixel(const int x, const int y, const olc::Pixel&, const olc::Pixel&)> funcPixelMode;
 		std::chrono::time_point<std::chrono::system_clock> m_tp1, m_tp2;
 
@@ -1318,8 +1339,9 @@ namespace olc
 	{}
 
 
-	olc::rcode PixelGameEngine::Construct(int32_t screen_w, int32_t screen_h, int32_t pixel_w, int32_t pixel_h, bool full_screen, bool vsync)
+	olc::rcode PixelGameEngine::Construct(int32_t screen_w, int32_t screen_h, int32_t pixel_w, int32_t pixel_h, bool full_screen, bool vsync, bool cohesion)
 	{
+		bPixelCohesion = cohesion;
 		vScreenSize = { screen_w, screen_h };
 		vInvScreenSize = { 1.0f / float(screen_w), 1.0f / float(screen_h) };
 		vPixelSize = { pixel_w, pixel_h };
@@ -1492,14 +1514,19 @@ namespace olc
 		return pMouseState[b];
 	}
 
-	int32_t PixelGameEngine::GetMouseX()
+	int32_t PixelGameEngine::GetMouseX() const
 	{
 		return vMousePos.x;
 	}
 
-	int32_t PixelGameEngine::GetMouseY()
+	int32_t PixelGameEngine::GetMouseY() const
 	{
 		return vMousePos.y;
+	}
+
+	const olc::vi2d& PixelGameEngine::GetMousePos() const
+	{
+		return vMousePos;
 	}
 
 	int32_t PixelGameEngine::GetMouseWheel()
@@ -1525,6 +1552,16 @@ namespace olc
 	const olc::vi2d& PixelGameEngine::GetWindowSize() const
 	{
 		return vWindowSize;
+	}
+
+	const olc::vi2d& PixelGameEngine::GetPixelSize() const
+	{
+		return vPixelSize;
+	}
+
+	const olc::vi2d& PixelGameEngine::GetScreenPixelSize() const
+	{
+		return vScreenPixelSize;
 	}
 
 	const olc::vi2d& PixelGameEngine::GetWindowMouse() const
@@ -2397,13 +2434,21 @@ namespace olc
 		int32_t wh = vScreenSize.y * vPixelSize.y;
 		float wasp = (float)ww / (float)wh;
 
-		vViewSize.x = (int32_t)vWindowSize.x;
-		vViewSize.y = (int32_t)((float)vViewSize.x / wasp);
-
-		if (vViewSize.y > vWindowSize.y)
+		if (bPixelCohesion)
 		{
-			vViewSize.y = vWindowSize.y;
-			vViewSize.x = (int32_t)((float)vViewSize.y * wasp);
+			vScreenPixelSize = (vWindowSize / vScreenSize);
+			vViewSize = (vWindowSize / vScreenSize) * vScreenSize;
+		}
+		else
+		{
+			vViewSize.x = (int32_t)vWindowSize.x;
+			vViewSize.y = (int32_t)((float)vViewSize.x / wasp);
+
+			if (vViewSize.y > vWindowSize.y)
+			{
+				vViewSize.y = vWindowSize.y;
+				vViewSize.x = (int32_t)((float)vViewSize.y * wasp);
+			}
 		}
 
 		vViewPos = (vWindowSize - vViewSize) / 2;
@@ -2555,9 +2600,9 @@ namespace olc
 		nMouseWheelDelta = nMouseWheelDeltaCache;
 		nMouseWheelDeltaCache = 0;
 
-		renderer->ClearBuffer(olc::BLACK, true);
+		//	renderer->ClearBuffer(olc::BLACK, true);
 
-		// Handle Frame Update
+			// Handle Frame Update
 		if (!OnUserUpdate(fElapsedTime))
 			bAtomActive = false;
 
@@ -2675,6 +2720,7 @@ namespace olc
 #if defined(OLC_GFX_OPENGL10)
 #if defined(_WIN32)
 #include <windows.h>
+#include <dwmapi.h>
 #include <GL/gl.h>
 typedef BOOL(WINAPI wglSwapInterval_t) (int interval);
 static wglSwapInterval_t* wglSwapInterval = nullptr;
@@ -2704,6 +2750,7 @@ namespace olc
 	private:
 		glDeviceContext_t glDeviceContext = 0;
 		glRenderContext_t glRenderContext = 0;
+		bool bSync = false;
 
 #if defined(__linux__) || defined(__FreeBSD__)
 		X11::Display* olc_Display = nullptr;
@@ -2738,6 +2785,7 @@ namespace olc
 			// Remove Frame cap
 			wglSwapInterval = (wglSwapInterval_t*)wglGetProcAddress("wglSwapIntervalEXT");
 			if (wglSwapInterval && !bVSYNC) wglSwapInterval(0);
+			bSync = bVSYNC;
 #endif
 
 #if defined(__linux__) || defined(__FreeBSD__)
@@ -2791,6 +2839,7 @@ namespace olc
 		{
 #if defined(_WIN32)
 			SwapBuffers(glDeviceContext);
+			if (bSync) DwmFlush(); // Woooohooooooo!!!! SMOOOOOOOTH!
 #endif	
 
 #if defined(__linux__) || defined(__FreeBSD__)
@@ -2855,6 +2904,8 @@ namespace olc
 			glBindTexture(GL_TEXTURE_2D, id);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			return id;
 		}
@@ -2904,6 +2955,7 @@ namespace olc
 #pragma comment(lib, "opengl32.lib")	// these libs to your linker input
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "Dwmapi.lib")
 #else
 	// In Code::Blocks
 #if !defined(_WIN32_WINNT)
@@ -2924,6 +2976,7 @@ namespace olc
 #include <windows.h>
 #include <gdiplus.h>
 #include <Shlwapi.h>
+#include <dwmapi.h>
 
 namespace olc
 {
@@ -2973,7 +3026,7 @@ namespace olc
 
 		virtual olc::rcode ThreadCleanUp() override
 		{
-			renderer->DestroyDevice();
+			renderer->DestroyDevice();			
 			PostMessage(olc_hWnd, WM_DESTROY, 0, 0);
 			return olc::OK;
 		}
@@ -3113,7 +3166,7 @@ namespace olc
 			case WM_MBUTTONDOWN:ptrPGE->olc_UpdateMouseState(2, true);                                  return 0;
 			case WM_MBUTTONUP:	ptrPGE->olc_UpdateMouseState(2, false);                                 return 0;
 			case WM_CLOSE:		ptrPGE->olc_Terminate();                                                return 0;
-			case WM_DESTROY:	PostQuitMessage(0);                                                     return 0;
+			case WM_DESTROY:	PostQuitMessage(0); DestroyWindow(hWnd);								return 0;
 			}
 			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		}
@@ -3528,3 +3581,4 @@ namespace olc
 // O------------------------------------------------------------------------------O
 // | END OF OLC_PGE_APPLICATION                                                   |
 // O------------------------------------------------------------------------------O
+

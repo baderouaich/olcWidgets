@@ -286,7 +286,8 @@ namespace olc { namespace widgets
 
 	public:
 		//Modificators
-		//[0.0f...100.0f]
+
+		//Set percentage value [0.0f...100.0f]
 		void setValue(float value) noexcept 
 		{
 			//Clamp value
@@ -297,6 +298,7 @@ namespace olc { namespace widgets
 			else
 				m_value = value;
 		}
+
 
 		//Accessors
 		float getValue() const noexcept { return m_value; }
@@ -739,7 +741,27 @@ namespace olc { namespace widgets
 			m_progress_color
 		);
 
-		//Draw Percentage text e.g: 50/100
+		//Draw Percentage text e.g: 0.0%...100.0%
+		{		
+			std::stringstream ss;
+			ss	<< std::fixed
+				<< std::setprecision(m_value >= 100.0f || m_value <= 0.0f ? 0 : 2)
+				<< m_value << "%";
+
+			pge->DrawStringDecal(
+				{
+					this->pos.x + (this->size.x / 2.0f) - (pge->GetTextSize(ss.str()).x / 2.0f),
+					this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSize(ss.str()).y / 2.0f)
+					//this->pos.x + this->size.x + 3.0f,
+					//this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSize("100.0/100.0").y / 2.0f)
+				},
+				ss.str(),
+				this->theme.textActiveColor,
+				this->theme.textScale
+			);
+		}
+		/*
+		//
 		{
 			std::stringstream ss;
 			ss  << std::fixed 
@@ -758,6 +780,7 @@ namespace olc { namespace widgets
 				this->theme.textScale
 			);
 		}
+		*/
 	}
 
 	ProgressBar::~ProgressBar()
