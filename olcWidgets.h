@@ -441,8 +441,6 @@ namespace olc { namespace widgets
 		m_text(text),
 		m_text_color(theme.textIdleColor)
 	{
-
-		//Determine size depending on text size
 		vi2d textSize = pge->GetTextSize(m_text);
 		this->setSize(textSize);
 	}

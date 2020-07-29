@@ -65,7 +65,7 @@ public:
 		//Label
 		label = new olc::widgets::Label(
 			{ 30, 60 },
-			"My Label"
+			"Label"
 		);
 
 
