@@ -13,10 +13,10 @@ public:
 
 private:
 	olc::widgets::Button* button;
-	olc::widgets::Label* label;
 	olc::widgets::DropDownList* dropDownList;
 	olc::widgets::SpriteButton* spriteBtn;
 	olc::widgets::ProgressBar* progressBar;
+	olc::widgets::Label* label;
 
 public:
 	bool OnUserCreate() override
