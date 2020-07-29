@@ -211,12 +211,6 @@ namespace olc { namespace widgets
 	class Button : public Widget
 	{		
 	public:
-		Button(const vi2d& size, const std::string& text, const WidgetTheme& theme = WidgetTheme())
-		:
-		Button({ 0, 0 }, size, text, theme)
-		{
-
-		}
 		Button(const vi2d& position, const vi2d& size, const std::string& text, const WidgetTheme& theme = WidgetTheme());
 		virtual ~Button();
 
