@@ -13,6 +13,7 @@ public:
 
 private:
 	olc::widgets::Button* button;
+	olc::widgets::Label* label;
 	olc::widgets::DropDownList* dropDownList;
 	olc::widgets::SpriteButton* spriteBtn;
 	olc::widgets::ProgressBar* progressBar;
@@ -59,6 +60,14 @@ public:
 		);
 		progressBar->setValue(progressBar->getValue() + 10.0f); // 60%: 50% + 10%
 
+		
+
+		//Label
+		label = new olc::widgets::Label(
+			{ 30, 60 },
+			"My Label"
+		);
+
 
 		return true;
 	}
@@ -74,12 +83,14 @@ public:
 		dropDownList->Update(fElapsedTime);
 		spriteBtn->Update(fElapsedTime);
 		progressBar->Update(fElapsedTime);  progressBar->setValue(progressBar->getValue() + (GetMouseWheel() > 0 ? 100 * fElapsedTime : GetMouseWheel() < 0 ? -100 * fElapsedTime : 0));
+		label->Update(fElapsedTime); 
 
 		//Draw
 		button->Draw();
 		dropDownList->Draw();
 		spriteBtn->Draw();
 		progressBar->Draw();
+		label->Draw();
 
 		return true;
 	}
@@ -90,6 +101,7 @@ public:
 		delete dropDownList;
 		delete spriteBtn;
 		delete progressBar;
+		delete label;
 
 		return true;
 	}

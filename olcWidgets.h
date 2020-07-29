@@ -128,6 +128,11 @@ namespace olc { namespace widgets
 
 	public:
 		//Accessors
+		constexpr bool isPressed() const noexcept { return state == WidgetState::PRESSED; }
+		constexpr bool isHover()   const noexcept { return state == WidgetState::HOVER; }
+		constexpr bool isIdle()    const noexcept { return state == WidgetState::IDLE; }
+		constexpr bool isFocused() const noexcept { return state == WidgetState::FOCUSED || state == WidgetState::PRESSED; }
+
 		const unsigned short getId() const noexcept { return id; }
 		const vi2d& getPosition() const noexcept { return this->pos; }
 		const vi2d& getSize() const noexcept { return this->size; }
@@ -166,6 +171,36 @@ namespace olc { namespace widgets
 
 
 
+	////////////////////////////////////////////////////////////////////
+	/////////======= Label Class Definition BEGIN =======///////////////
+	////////////////////////////////////////////////////////////////////
+	class Label : public Widget
+	{
+	public:
+		Label(const vi2d& position, const std::string& text, const WidgetTheme& theme = WidgetTheme());
+		virtual ~Label();
+
+		virtual void Update(const float& dt) override;
+		virtual void Draw() override;
+
+		//Accessors
+		const std::string& getText() const noexcept { return m_text; }
+
+		//Modificators
+		void setText(const std::string& text) noexcept { m_text = text; }
+
+
+	private:
+		std::string m_text;
+		Pixel m_text_color;
+
+	};
+	////////////////////////////////////////////////////////////////////
+	//////////======= Label Class Definition END =======////////////////
+	////////////////////////////////////////////////////////////////////
+
+
+
 
 
 
@@ -182,11 +217,6 @@ namespace olc { namespace widgets
 		virtual void Draw() override;
 
 		//Accessors
-		constexpr bool isPressed() const noexcept { return state == WidgetState::PRESSED; }
-		constexpr bool isHover()   const noexcept { return state == WidgetState::HOVER;   }
-		constexpr bool isIdle()    const noexcept { return state == WidgetState::IDLE;    }
-		constexpr bool isFocused() const noexcept { return state == WidgetState::FOCUSED || state == WidgetState::PRESSED; }
-
 		const std::string& getText() const noexcept { return m_text; }
 		const vf2d& getTextScale()   const noexcept { return this->theme.textScale; }
 
@@ -396,6 +426,70 @@ namespace olc { namespace widgets
 	///////======= Widget Base Class Implementation END ========////////
 	////////////////////////////////////////////////////////////////////
 
+
+
+
+
+	////////////////////////////////////////////////////////////////////
+	/////////======= Label Class Implementation BEGIN =======///////////
+	////////////////////////////////////////////////////////////////////
+	Label::Label(const vi2d& position,
+		const std::string& text,
+		const WidgetTheme& theme)
+		:
+		Widget(position, {0, 0}, theme),
+		m_text(text),
+		m_text_color(theme.textIdleColor)
+	{
+
+		//Determine size depending on text size
+		vi2d textSize = pge->GetTextSize(m_text);
+		this->setSize(textSize);
+	}
+	
+	void Label::Update(const float& dt)
+	{
+		Widget::Update(dt);
+
+		//Update Label & Text Color depending on state.
+		switch (this->state)
+		{
+		case WidgetState::IDLE:
+			m_text_color = this->theme.textIdleColor;
+			break;
+		case WidgetState::HOVER:
+			m_text_color = this->theme.textHoverColor;
+			break;
+		case WidgetState::PRESSED:
+			m_text_color = this->theme.textActiveColor;
+			break;
+		default: //Error state
+			m_text_color = RED;
+			break;
+		}
+	}
+
+	void Label::Draw()
+	{
+		Widget::Draw();
+
+		//Draw Label Text
+		pge->DrawStringDecal(
+			this->pos,
+			m_text,
+			m_text_color,
+			this->theme.textScale
+		);
+
+	}
+	Label::~Label()
+	{
+
+	}
+
+	////////////////////////////////////////////////////////////////////
+	/////////======= Label Class Implementation END =======/////////////
+	////////////////////////////////////////////////////////////////////
 
 
 

@@ -3,6 +3,7 @@ Some basic UI Widgets for the olc::PixelGameEngine
 
 
 # Supported Widgets 
+- Label
 - Button
 - SpriteButton
 - DropDownList
