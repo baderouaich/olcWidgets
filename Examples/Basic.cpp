@@ -48,7 +48,7 @@ public:
 			{ dropDownList->getPosition().x + dropDownList->getSize().x + 30, 10 },
 			{ 130, 40 },
 			"Sprite Btn",
-			"btnSpr130x40.png"
+			"Examples/btnSpr130x40.png"
 		);
 
 
