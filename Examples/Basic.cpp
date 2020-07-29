@@ -3,12 +3,12 @@
 #define OLC_PGEX_WIDGETS
 #include "olcWidgets.h"
 
-class olcWidgetsExample : public olc::PixelGameEngine
+class olcWidgetsBasicExample : public olc::PixelGameEngine
 {
 public:
-	olcWidgetsExample()
+	olcWidgetsBasicExample()
 	{
-		sAppName = "olcWidgets Example";
+		sAppName = "olcWidgets Basic Example";
 	}
 
 private:
@@ -69,6 +69,7 @@ public:
 		);
 
 
+
 		return true;
 	}
 
@@ -102,7 +103,7 @@ public:
 		delete spriteBtn;
 		delete progressBar;
 		delete label;
-
+		
 		return true;
 	}
 };
@@ -111,7 +112,7 @@ public:
 
 int main()
 {
-	olcWidgetsExample demo;
+	olcWidgetsBasicExample demo;
 	if (demo.Construct(640, 480, 2, 2))
 		demo.Start();
 	return 0;

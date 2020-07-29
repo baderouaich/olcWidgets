@@ -65,6 +65,7 @@ namespace olc { namespace widgets
 	/////////======= Widget Base Class Definition BEGIN =======/////////
 	////////////////////////////////////////////////////////////////////
 	enum WidgetState { IDLE = 0, HOVER, PRESSED, FOCUSED };
+	enum Orientation { VERTICAL, HORIZONTAL };
 	struct WidgetTheme
 	{
 		//Widget text scale x,y
@@ -210,6 +211,12 @@ namespace olc { namespace widgets
 	class Button : public Widget
 	{		
 	public:
+		Button(const vi2d& size, const std::string& text, const WidgetTheme& theme = WidgetTheme())
+		:
+		Button({ 0, 0 }, size, text, theme)
+		{
+
+		}
 		Button(const vi2d& position, const vi2d& size, const std::string& text, const WidgetTheme& theme = WidgetTheme());
 		virtual ~Button();
 
@@ -354,6 +361,99 @@ namespace olc { namespace widgets
 
 
 
+#if 0
+	////////////////////////////////////////////////////////////////////
+	/////////========= Layout Class Definition BEGIN =======////////////
+	////////////////////////////////////////////////////////////////////
+	enum Alignment {SPACE_BETWEEN, SPACE_AROUND, SPACE_EVENLY};
+	class Layout : public Widget
+	{
+	public:
+		//Vertical Layout
+		Layout(const vi2d& position, int spacing, Orientation orientation = Orientation::VERTICAL)
+			:
+			Widget(position, { 0, 0 }), //Dynamic size,
+			m_widgets(),
+			m_spacing(spacing),
+			m_orientation(orientation),
+			m_widgets_height_sum(0)
+		{
+		}
+		virtual ~Layout()
+		{
+			Destroy();
+		}
+
+		virtual void Update(const float& dt) override
+		{
+
+			for (auto& w : m_widgets)
+					w->Update(dt);
+			
+		}
+		virtual void Draw() override
+		{
+
+			for (auto& w : m_widgets)
+					w->Draw();
+		}
+
+		/**
+		 * Add a new widget in the container
+		 * The container will take care of widget deallocation
+		 * @return added widget
+		 */
+		void Add(Widget* widget)
+		{
+			m_widgets_height_sum += widget->getSize().y;
+
+		
+			widget->setPosition(
+				{ 
+					this->pos.x, 
+					this->pos.y + m_widgets_height_sum + m_spacing
+				}
+			); // y+ spacing for vertical
+			m_widgets.emplace_back(widget);
+
+			std::cout << widget->getPosition().x << ", " << widget->getPosition().y << std::endl;
+			std::cout << "m_widgets_height_sum: " << m_widgets_height_sum << std::endl<< std::endl;
+		}
+
+	
+		/// Helpers
+		//Button* addButton(const sf::String& string, std::function<void(void)> callback);
+		//Label* addLabel(const sf::String& string);
+		//FormLayout* addFormLayout();
+		//HBoxLayout* addHBoxLayout();
+		//VBoxLayout* addVBoxLayout();
+
+		void Destroy()
+		{
+			for (auto& w : m_widgets)
+			{
+				if (w)
+				{
+					delete w;
+					w = nullptr;
+				}
+			}
+			m_widgets.clear();
+		}
+	private:
+		std::vector<Widget*> m_widgets;
+		int m_spacing;
+		Orientation m_orientation;
+		int m_widgets_height_sum;
+	};
+
+
+
+	////////////////////////////////////////////////////////////////////
+	/////////========= Layout Class Definition END =======//////////////
+	////////////////////////////////////////////////////////////////////
+#endif
+
 
 
 
@@ -495,8 +595,10 @@ namespace olc { namespace widgets
 	////////////////////////////////////////////////////////////////////
 	/////////======= Button Class Implementation BEGIN =======//////////
 	////////////////////////////////////////////////////////////////////
-	Button::Button(const vi2d& position, const vi2d& size, 
-		const std::string& text, const WidgetTheme& theme)
+	Button::Button(const vi2d& position, 
+		const vi2d& size, 
+		const std::string& text, 
+		const WidgetTheme& theme)
 		:
 		Widget(position, size, theme, WidgetState::IDLE),
 		m_text(text)
