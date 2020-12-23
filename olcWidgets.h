@@ -64,7 +64,7 @@ namespace olc { namespace widgets
 	////////////////////////////////////////////////////////////////////
 	/////////======= Widget Base Class Definition BEGIN =======/////////
 	////////////////////////////////////////////////////////////////////
-	enum WidgetState { IDLE = 0, HOVER, PRESSED, FOCUSED };
+	enum class WidgetState { IDLE = 0, HOVER, PRESSED, FOCUSED };
 	enum Orientation { VERTICAL, HORIZONTAL };
 	struct WidgetTheme
 	{
@@ -121,7 +121,7 @@ namespace olc { namespace widgets
 
 
 	public:
-		Widget(const vi2d& position, const vi2d& size, const WidgetTheme& theme = WidgetTheme(), WidgetState state = WidgetState::IDLE);
+		Widget(const vf2d& position, const vf2d& size, const WidgetTheme& theme = WidgetTheme(), WidgetState state = WidgetState::IDLE);
 		virtual ~Widget() = default;
 		
 		virtual void Update(const float& dt);
@@ -135,18 +135,18 @@ namespace olc { namespace widgets
 		constexpr bool isFocused() const noexcept { return state == WidgetState::FOCUSED || state == WidgetState::PRESSED; }
 
 		const unsigned short getId() const noexcept { return id; }
-		const vi2d& getPosition() const noexcept { return this->pos; }
-		const vi2d& getSize() const noexcept { return this->size; }
+		const vf2d& getPosition() const noexcept { return this->pos; }
+		const vf2d& getSize() const noexcept { return this->size; }
 
 		//Modificators
 		void setId(unsigned short id) noexcept { this->id = id; }
-		void setSize(const vi2d& size) noexcept { this->size = size; }
-		void setPosition(const vi2d& position) noexcept { this->pos = position; }
+		void setSize(const vf2d& size) noexcept { this->size = size; }
+		void setPosition(const vf2d& position) noexcept { this->pos = position; }
 
 	protected:
 		unsigned short id;
-		vi2d pos;
-		vi2d size;
+		vf2d pos;
+		vf2d size;
 		WidgetTheme theme;
 		WidgetState state;
 
@@ -154,8 +154,8 @@ namespace olc { namespace widgets
 		static unsigned short idc; // id incremental counter 
 
 	protected:
-		constexpr bool contains(const olc::vi2d& point) const noexcept { return (point.x >= pos.x && point.y >= pos.y && point.x < pos.x + size.x && point.y < pos.y + size.y); }
-		void setState(WidgetState state) noexcept { state = state; }
+		constexpr bool contains(const olc::vf2d& point) const noexcept { return (point.x >= pos.x && point.y >= pos.y && point.x < pos.x + size.x * theme.textScale.x && point.y < pos.y + size.y * theme.textScale.y); }
+		void setState(WidgetState state) noexcept { this->state = state; }
 		WidgetState getState() const noexcept { return state; }
 
 	protected:
@@ -164,7 +164,7 @@ namespace olc { namespace widgets
 
 	//Initialize Static Memmbers
 	olc::PixelGameEngine* olc::widgets::Widget::pge = nullptr;
-	unsigned short olc::widgets::Widget::idc = 0;
+	unsigned short olc::widgets::Widget::idc = 0u;
 	////////////////////////////////////////////////////////////////////
 	/////////======= Widget Base Class Definition END =======///////////
 	////////////////////////////////////////////////////////////////////
@@ -178,8 +178,8 @@ namespace olc { namespace widgets
 	class Label : public Widget
 	{
 	public:
-		Label(const vi2d& position, const std::string& text, const WidgetTheme& theme = WidgetTheme());
-		virtual ~Label();
+		Label(const vf2d& position, const std::string& text, const WidgetTheme& theme = WidgetTheme());
+		virtual ~Label() noexcept;
 
 		virtual void Update(const float& dt) override;
 		virtual void Draw() override;
@@ -211,8 +211,8 @@ namespace olc { namespace widgets
 	class Button : public Widget
 	{		
 	public:
-		Button(const vi2d& position, const vi2d& size, const std::string& text, const WidgetTheme& theme = WidgetTheme());
-		virtual ~Button();
+		Button(const vf2d& position, const vf2d& size, const std::string& text, const WidgetTheme& theme = WidgetTheme());
+		virtual ~Button() noexcept;
 
 		virtual void Update(const float& dt) override;
 		virtual void Draw() override;
@@ -253,8 +253,8 @@ namespace olc { namespace widgets
 	class SpriteButton : public Button
 	{		
 	public:
-		SpriteButton(const vi2d& position, const vi2d& size, const std::string& text, const std::string& sprPath, const WidgetTheme& theme = WidgetTheme());
-		virtual ~SpriteButton();
+		SpriteButton(const vf2d& position, const vf2d& size, const std::string& text, const std::string& sprPath, const WidgetTheme& theme = WidgetTheme());
+		virtual ~SpriteButton() noexcept;
 
 		virtual void Update(const float& dt) override;
 		virtual void Draw() override;
@@ -280,8 +280,8 @@ namespace olc { namespace widgets
 	class DropDownList : public Widget
 	{
 	public:
-		DropDownList(const vi2d& position, const vi2d& size, const std::vector<std::string>& elementsList, size_t defaultIndex, const WidgetTheme& theme = WidgetTheme());
-		virtual ~DropDownList();
+		DropDownList(const vf2d& position, const vf2d& size, const std::vector<std::string>& elementsList, size_t defaultIndex, const WidgetTheme& theme = WidgetTheme());
+		virtual ~DropDownList() noexcept;
 
 		virtual void Update(const float& dt) override;
 		virtual void Draw() override;
@@ -316,8 +316,8 @@ namespace olc { namespace widgets
 	class ProgressBar : public Widget
 	{
 	public:
-		ProgressBar(const vi2d& position, const vi2d& size, float value = 0.0f, Pixel progressColor = GREEN, const WidgetTheme& theme = WidgetTheme());
-		virtual ~ProgressBar();
+		ProgressBar(const vf2d& position, const vf2d& size, float value = 0.0f, Pixel progressColor = GREEN, const WidgetTheme& theme = WidgetTheme());
+		virtual ~ProgressBar() noexcept;
 
 		virtual void Update(const float& dt) override;
 		virtual void Draw() override;
@@ -364,7 +364,7 @@ namespace olc { namespace widgets
 	{
 	public:
 		//Vertical Layout
-		Layout(const vi2d& position, int spacing, Orientation orientation = Orientation::VERTICAL)
+		Layout(const vf2d& position, int spacing, Orientation orientation = Orientation::VERTICAL)
 			:
 			Widget(position, { 0, 0 }), //Dynamic size,
 			m_widgets(),
@@ -456,8 +456,6 @@ namespace olc { namespace widgets
 #endif
 
 
-
-
 #ifdef OLC_PGEX_WIDGETS
 #undef OLC_PGEX_WIDGETS
 
@@ -477,7 +475,7 @@ namespace olc { namespace widgets
 		pge = pixel_game_engine;
 	}
 
-	Widget::Widget(const vi2d& position, const vi2d& size, const WidgetTheme& theme, WidgetState state)
+	Widget::Widget(const vf2d& position, const vf2d& size, const WidgetTheme& theme, WidgetState state)
 		:
 		pos(position),
 		size(size),
@@ -499,7 +497,7 @@ namespace olc { namespace widgets
 		state = WidgetState::IDLE;
 
 		//Hover
-		if (this->contains({ this->pge->GetMouseX() ,this->pge->GetMouseY() }))
+		if (this->contains({ float(this->pge->GetMouseX()) ,float(this->pge->GetMouseY()) }))
 		{
 			state = WidgetState::HOVER;
 
@@ -527,7 +525,7 @@ namespace olc { namespace widgets
 	////////////////////////////////////////////////////////////////////
 	/////////======= Label Class Implementation BEGIN =======///////////
 	////////////////////////////////////////////////////////////////////
-	Label::Label(const vi2d& position,
+	Label::Label(const vf2d& position,
 		const std::string& text,
 		const WidgetTheme& theme)
 		:
@@ -535,7 +533,7 @@ namespace olc { namespace widgets
 		m_text(text),
 		m_text_color(theme.textIdleColor)
 	{
-		vi2d textSize = pge->GetTextSize(m_text);
+		const vf2d textSize = pge->GetTextSizeProp(m_text);
 		this->setSize(textSize);
 	}
 	
@@ -566,15 +564,21 @@ namespace olc { namespace widgets
 		Widget::Draw();
 
 		//Draw Label Text
-		pge->DrawStringDecal(
-			this->pos,
-			m_text,
-			m_text_color,
-			this->theme.textScale
-		);
+		pge->DrawStringPropDecal(pos, m_text, m_text_color, this->theme.textScale);
 
+		//pge->DrawStringPropDecal
+		//(
+		//	//put text in middle
+		//	{
+		//		this->pos.x + (this->size.x / 2.0f) - (pge->GetTextSizeProp(m_text).x / 2.0f),
+		//		this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSizeProp(m_text).y / 2.0f)
+		//	},
+		//	m_text,
+		//	m_text_color,
+		//	this->theme.textScale
+		//);
 	}
-	Label::~Label()
+	Label::~Label() noexcept
 	{
 
 	}
@@ -589,8 +593,8 @@ namespace olc { namespace widgets
 	////////////////////////////////////////////////////////////////////
 	/////////======= Button Class Implementation BEGIN =======//////////
 	////////////////////////////////////////////////////////////////////
-	Button::Button(const vi2d& position, 
-		const vi2d& size, 
+	Button::Button(const vf2d& position, 
+		const vf2d& size, 
 		const std::string& text, 
 		const WidgetTheme& theme)
 		:
@@ -637,12 +641,12 @@ namespace olc { namespace widgets
 		pge->FillRect(this->pos, this->size, m_color);
 
 		//text
-		pge->DrawStringDecal
+		pge->DrawStringPropDecal
 		(
 			//put text in middle
 			{
-				this->pos.x + (this->size.x / 2.0f) - (pge->GetTextSize(m_text).x / 2.0f),
-				this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSize(m_text).y / 2.0f)
+				this->pos.x + (this->size.x / 2.0f) - (pge->GetTextSizeProp(m_text).x / 2.0f),
+				this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSizeProp(m_text).y / 2.0f)
 			},
 			m_text,
 			m_text_color,
@@ -655,17 +659,17 @@ namespace olc { namespace widgets
 			//Enable opacity
 			pge->SetPixelMode(Pixel::ALPHA);
 			//Bottom
-			pge->DrawLine(pos.x, pos.y + size.y, pos.x + size.x, pos.y + size.y, this->theme.shadowColor);
+			pge->DrawLine(static_cast<std::uint32_t>(pos.x), static_cast<std::uint32_t>(pos.y + size.y), static_cast<std::uint32_t>(pos.x + size.x), static_cast<std::uint32_t>(pos.y + size.y), this->theme.shadowColor);
 			//Right (to pos.y + size.y - 1: to not meet with bottom light, this will douplicate alpha color shadow at one point)
-			pge->DrawLine(pos.x + size.x, pos.y, pos.x + size.x, pos.y + size.y - 1, this->theme.shadowColor);
+			pge->DrawLine(static_cast<std::uint32_t>(pos.x + size.x), static_cast<std::uint32_t>(pos.y), static_cast<std::uint32_t>(pos.x + size.x), static_cast<std::uint32_t>(pos.y + size.y - 1), this->theme.shadowColor);
 			//Disable opacity
 			pge->SetPixelMode(Pixel::NORMAL);
 		}
-
+		
 
 	}
 
-	Button::~Button()
+	Button::~Button() noexcept
 	{
 	}
 	////////////////////////////////////////////////////////////////////
@@ -681,7 +685,7 @@ namespace olc { namespace widgets
 	///////===== SpriteButton Class Implementation BEGIN =======////////
 	////////////////////////////////////////////////////////////////////
 	SpriteButton::SpriteButton(
-		const vi2d& position, const vi2d& size,
+		const vf2d& position, const vf2d& size,
 		const std::string& text, 
 		const std::string& sprPath,
 		const WidgetTheme& theme)
@@ -723,7 +727,7 @@ namespace olc { namespace widgets
 		pge->SetPixelMode(Pixel::NORMAL);
 	}
 
-	SpriteButton::~SpriteButton()
+	SpriteButton::~SpriteButton() noexcept
 	{
 	}
 	////////////////////////////////////////////////////////////////////
@@ -740,8 +744,8 @@ namespace olc { namespace widgets
 	////////////////////////////////////////////////////////////////////
 	///////===== DropDownList Class Implementation BEGIN =======////////
 	////////////////////////////////////////////////////////////////////
-	DropDownList::DropDownList(const vi2d& position, 
-		const vi2d& size, 
+	DropDownList::DropDownList(const vf2d& position, 
+		const vf2d& size, 
 		const std::vector<std::string>& elementsList, 
 		size_t defaultIndex,
 		const WidgetTheme& theme)
@@ -830,7 +834,7 @@ namespace olc { namespace widgets
 	}
 
 
-	DropDownList::~DropDownList()
+	DropDownList::~DropDownList() noexcept
 	{
 		delete m_active_element;
 		for (auto& element : m_elements_list)
@@ -858,8 +862,8 @@ namespace olc { namespace widgets
 	///////===== ProgressBar Class Implementation BEGIN ======//////////
 	////////////////////////////////////////////////////////////////////
 	ProgressBar::ProgressBar(
-		const vi2d& position,
-		const vi2d& size,
+		const vf2d& position,
+		const vf2d& size,
 		float value,
 		Pixel progressColor,
 		const WidgetTheme& theme)
@@ -893,66 +897,43 @@ namespace olc { namespace widgets
 
 		//Draw transparent fill progress rect  (not the value, background of value)
 		pge->FillRect(
-			this->pos.x + 1,
-			this->pos.y + 1,
-			this->size.x - 1, 
-			this->size.y - 1,
+			static_cast<std::uint32_t>(this->pos.x + 1),
+			static_cast<std::uint32_t>(this->pos.y + 1),
+			static_cast<std::uint32_t>(this->size.x - 1), 
+			static_cast<std::uint32_t>(this->size.y - 1),
 			Pixel(255, 255, 255, 200)
 		);
 
 
 		//Draw Line to fill progress rect according to progress value
 		pge->FillRect(
-			this->pos.x + 1,
-			this->pos.y + 1,
-			int(((this->size.x - 1) * m_value) / 100.0f), // calculate percentage value
-			this->size.y - 1,
+			static_cast<std::uint32_t>(this->pos.x + 1),
+			static_cast<std::uint32_t>(this->pos.y + 1),
+			static_cast<std::uint32_t>(((this->size.x - 1) * m_value) / 100.0f), // calculate percentage value
+			static_cast<std::uint32_t>(this->size.y - 1),
 			m_progress_color
 		);
 
 		//Draw Percentage text e.g: 0.0%...100.0%
 		{		
-			std::stringstream ss;
+			std::ostringstream ss;
 			ss	<< std::fixed
 				<< std::setprecision(m_value >= 100.0f || m_value <= 0.0f ? 0 : 2)
 				<< m_value << "%";
 
-			pge->DrawStringDecal(
+			pge->DrawStringPropDecal(
 				{
-					this->pos.x + (this->size.x / 2.0f) - (pge->GetTextSize(ss.str()).x / 2.0f),
-					this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSize(ss.str()).y / 2.0f)
-					//this->pos.x + this->size.x + 3.0f,
-					//this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSize("100.0/100.0").y / 2.0f)
+					this->pos.x + (this->size.x / 2.0f) - (pge->GetTextSizeProp(ss.str()).x / 2.0f),
+					this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSizeProp(ss.str()).y / 2.0f)
 				},
 				ss.str(),
 				this->theme.textActiveColor,
 				this->theme.textScale
 			);
 		}
-		/*
-		//Show percentage value/max
-		{
-			std::stringstream ss;
-			ss  << std::fixed 
-				<< std::setprecision(m_value >= 100.0f || m_value <= 0.0f ? 0 : 2)
-				<< m_value << "/100";
-
-			pge->DrawStringDecal(
-				{
-					this->pos.x + (this->size.x / 2.0f) - (pge->GetTextSize(ss.str()).x / 2.0f),
-					this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSize(ss.str()).y / 2.0f)
-					//this->pos.x + this->size.x + 3.0f,
-					//this->pos.y + (this->size.y / 2.0f) - (pge->GetTextSize("100.0/100.0").y / 2.0f)
-				},
-				ss.str(), 
-				this->theme.textActiveColor,
-				this->theme.textScale
-			);
-		}
-		*/
 	}
 
-	ProgressBar::~ProgressBar()
+	ProgressBar::~ProgressBar() noexcept
 	{
 	}
 	////////////////////////////////////////////////////////////////////
