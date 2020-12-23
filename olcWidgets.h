@@ -2,7 +2,7 @@
 	olcWidgets.h
 	+-------------------------------------------------------------+
 	|         OneLoneCoder Pixel Game Engine Extension            |
-	|                   olcWidgets - 1.0v                         |
+	|                   olcWidgets - 1.1.1v                       |
 	+-------------------------------------------------------------+
 	What is this?
 	~~~~~~~~~~~~~
