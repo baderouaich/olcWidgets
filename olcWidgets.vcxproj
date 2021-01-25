@@ -150,7 +150,7 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Examples\Basic.cpp" />
+    <ClCompile Include="Examples\GameMenuExample.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="olcPixelGameEngine.h" />

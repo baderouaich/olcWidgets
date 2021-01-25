@@ -22,7 +22,7 @@ public:
 	bool OnUserCreate() override
 	{
 		/// Initialize olcWidgets
-		olc::widgets::Widget::Init(this);
+		olc::widgets::Widget::init(this);
 
 		/// Construct Desired Widgets
 

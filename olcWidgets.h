@@ -2,7 +2,7 @@
 	olcWidgets.h
 	+-------------------------------------------------------------+
 	|         OneLoneCoder Pixel Game Engine Extension            |
-	|                   olcWidgets - 1.1.1v                       |
+	|                   olcWidgets - 1.2.1v                       |
 	+-------------------------------------------------------------+
 	What is this?
 	~~~~~~~~~~~~~
@@ -11,7 +11,7 @@
 	menu system.
 	License (OLC-3)
 	~~~~~~~~~~~~~~~
-	Copyright 2018 - 2020 OneLoneCoder.com
+	Copyright 2018 - 2021 OneLoneCoder.com
 	Redistribution and use in source and binary forms, with or without
 	modification, are permitted provided that the following conditions
 	are met:
@@ -48,7 +48,7 @@
 	Authors
 	~~~~~~
 	Bader Eddine Ouaich
-	David Barr, aka javidx9, ©OneLoneCoder 2020
+	David Barr, aka javidx9, ©OneLoneCoder 2021
 */
 
 #ifndef OLC_PGEX_WIDGETS_DEF
@@ -97,7 +97,7 @@ namespace olc { namespace widgets
 	class Widget
 	{
 	public:
-		static void Init(PixelGameEngine* pixel_game_engine);
+		static void init(PixelGameEngine* pixel_game_engine);
 
 	protected:
 		struct Clock
@@ -112,7 +112,7 @@ namespace olc { namespace widgets
 			{
 				if (timer >= max_click_secs)
 				{
-					timer = 0.0f; //restart
+					timer = 0.0f;
 					return true;
 				}
 				return false;
@@ -144,17 +144,17 @@ namespace olc { namespace widgets
 		void setPosition(const vf2d& position) noexcept { this->pos = position; }
 
 	protected:
-		unsigned short id;
-		vf2d pos;
-		vf2d size;
+		std::size_t id;
+		olc::vf2d pos;
+		olc::vf2d size;
 		WidgetTheme theme;
 		WidgetState state;
 
 	private:
-		static unsigned short idc; // id incremental counter 
+		static std::size_t idc; // id incremental counter 
 
 	protected:
-		constexpr bool contains(const olc::vf2d& point) const noexcept { return (point.x >= pos.x && point.y >= pos.y && point.x < pos.x + size.x * theme.textScale.x && point.y < pos.y + size.y * theme.textScale.y); }
+		constexpr const bool contains(const olc::vf2d& point) const noexcept { return (point.x >= pos.x && point.y >= pos.y && point.x < pos.x + size.x * theme.textScale.x && point.y < pos.y + size.y * theme.textScale.y); }
 		void setState(WidgetState state) noexcept { this->state = state; }
 		WidgetState getState() const noexcept { return state; }
 
@@ -164,7 +164,7 @@ namespace olc { namespace widgets
 
 	//Initialize Static Memmbers
 	olc::PixelGameEngine* olc::widgets::Widget::pge = nullptr;
-	unsigned short olc::widgets::Widget::idc = 0u;
+	std::size_t olc::widgets::Widget::idc = 0u;
 	////////////////////////////////////////////////////////////////////
 	/////////======= Widget Base Class Definition END =======///////////
 	////////////////////////////////////////////////////////////////////
@@ -289,9 +289,9 @@ namespace olc { namespace widgets
 	public:
 		//Accessors
 		const Button* getSelectedItem() const noexcept { return m_active_element; }
-		size_t getSelectedItemIndex() const
+		std::size_t getSelectedItemIndex() const
 		{
-			for (size_t i = 0; i < m_elements_list.size(); i++)
+			for (std::size_t i = 0; i < m_elements_list.size(); i++)
 				if (m_elements_list[i]->getId() == m_active_element->getId())
 					return i;
 			return 0;
@@ -470,7 +470,7 @@ namespace olc { namespace widgets
 	////////////////////////////////////////////////////////////////////
 	//////======= Widget Base Class Implementation BEGIN ========///////
 	////////////////////////////////////////////////////////////////////
-	void Widget::Init(PixelGameEngine* pixel_game_engine)
+	void Widget::init(PixelGameEngine* pixel_game_engine)
 	{
 		pge = pixel_game_engine;
 	}
@@ -482,7 +482,7 @@ namespace olc { namespace widgets
 		state(state),
 		theme(theme)
 	{
-		assert(pge && "olcGUI Must be Initialized, have you called olc::widgets::Widget::Init(this); in OnUserCreate() ?");
+		assert(pge && "olcWidgets Must be Initialized, have you called olc::widgets::Widget::init(this); in OnUserCreate() ?");
 		
 		//each widget has a unique incremental id 
 		id = ++idc;
@@ -497,7 +497,7 @@ namespace olc { namespace widgets
 		state = WidgetState::IDLE;
 
 		//Hover
-		if (this->contains({ float(this->pge->GetMouseX()) ,float(this->pge->GetMouseY()) }))
+		if (this->contains(olc::vf2d(static_cast<float>(this->pge->GetMouseX()), static_cast<float>(this->pge->GetMouseY()))))
 		{
 			state = WidgetState::HOVER;
 
@@ -507,8 +507,6 @@ namespace olc { namespace widgets
 				state = WidgetState::PRESSED;			
 			}
 		}
-
-
 	}
 
 	void Widget::Draw()
@@ -785,7 +783,7 @@ namespace olc { namespace widgets
 		m_active_element->Update(dt); //Update default active element
 
 		//Show & Hide the list, If active element is pressed, we show the dropdownlist elements list
-		if (m_active_element->isPressed() && this->clock.canClick()) // btn isPressed has built in canclick clock
+		if (m_active_element->isPressed() && this->clock.canClick())
 		{
 			m_show_list = !m_show_list; // On/Off
 		}

@@ -21,7 +21,7 @@ public:
 		using namespace olc::widgets;
 
 		/// Initialize olcWidgets
-		Widget::Init(this);
+		Widget::init(this);
 
 		/// Construct Desired Widgets
 		constexpr auto LABEL_TEXT = "Amazing Game Menu!";
@@ -78,7 +78,7 @@ public:
 	{
 		using namespace olc::widgets;
 
-		Clear(olc::DARK_GREY);
+		Clear(olc::VERY_DARK_CYAN);
 
 		/// Update & Draw your Widgets
 
@@ -91,11 +91,10 @@ public:
 
 		{ // ProgressBar
 			static float v = 0.0f;
-			auto& pbr = (ProgressBar&)*widgets["LoadingBar"];
+			auto& pbr = dynamic_cast<ProgressBar&>(*widgets["LoadingBar"]);
 			pbr.setValue(v);
 			v += fElapsedTime * 9.f;
-			if (v >= 100.0f)
-				v = 0.0;
+			if (v >= 100.0f) v = 0.0;
 		}
 
 		//Draw
@@ -104,9 +103,7 @@ public:
 			widget->Draw();
 		}
 
-		if (widgets["ExitButton"]->isPressed())
-			return false;
-		return true;
+		return not widgets["ExitButton"]->isPressed();
 	}
 
 	bool OnUserDestroy() override
