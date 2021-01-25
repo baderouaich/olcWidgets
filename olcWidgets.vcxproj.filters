@@ -18,9 +18,6 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Examples\GameMenuExample.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Examples\Basic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
